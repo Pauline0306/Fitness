@@ -5,6 +5,7 @@ import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 
+
 export const routes: Routes = [
     { path: 'admin', component: AdminComponent },
     { path: 'login', component: LoginComponent }

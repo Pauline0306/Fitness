@@ -8,12 +8,13 @@
 }
 
 .logo img {
-  width: 120px;
+  width: 500px;
   margin-bottom: 20px;
 }
 
 .login-box {
   width: 100%;
+  height: 380px;
   max-width: 400px;
   background: white;
   padding: 20px;
@@ -39,7 +40,7 @@ label {
 
 input[type="email"],
 input[type="password"] {
-  width: 100%;
+  width: 90%;
   padding: 10px;
   border: 1px solid #ddd;
   border-radius: 5px;
