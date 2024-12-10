@@ -1,46 +1,72 @@
-/* General Navbar Styling */
+/* Navbar Styling */
 .navbar {
-    width: 100%;
-    background-color: #fff;
-    padding: 1rem 2rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  width: flex;
+  display: flex;
+  justify-content: space-between; /* Space between logo and links */
+  align-items: center;
+  padding: 1rem 2rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background-color: #fff;
+}
+
+/* Add spacing below the navbar */
+body {
+  margin: 0;
+  padding-top: 80px; /* Height of navbar + some margin */
+}
+
+.navbar .logo {
+  display: flex;
+  align-items: center;
+}
+
+.navbar .logo img {
+  height: 40px;
+  margin-right: 10px;
+}
+
+.navbar .logo span {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #333;
+}
+
+.navbar .logo .fit {
+  color: #007BFF; /* Blue color for "Fit" */
+}
+
+.navbar .logo .connect {
+  color: #28A745; /* Green color for "Connect" */
+}
+
+.nav-links {
+  list-style: none;
+  display: flex;
+  margin: 0;
+  padding: 0;
+  gap: 20px; /* Use gap for consistent spacing between links */
+}
+
+/* Individual link items */
+.nav-links li {
+  list-style: none;
+}
+
+/* Link styling */
+.nav-links a {
+  text-decoration: none;
+  color: #333;
+  font-size: 1rem;
+  padding: 10px 15px; /* Create enough clickable space */
+  display: block;
+}
+
+.nav-links a:hover {
+  color: #007BFF;
+  background-color: rgba(0, 123, 255, 0.1);
+  border-radius: 5px;
+}
+
+  .nav-links.active {
+      display: flex;
   }
-  
-  .navbar .logo {
-    display: flex;
-    align-items: center;
-  }
-  
-  .navbar .logo img {
-    height: 40px;
-    margin-right: 10px;
-  }
-  
-  .navbar .logo span {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: #333;
-  }
-  
-  .nav-links {
-    list-style: none;
-    display: flex;
-  }
-  
-  .nav-links li {
-    margin-left: 20px;
-  }
-  
-  .nav-links a {
-    text-decoration: none;
-    color: #333;
-    font-size: 1rem;
-  }
-  
-  .nav-links a:hover {
-    color: #007BFF;
-  }
-  
