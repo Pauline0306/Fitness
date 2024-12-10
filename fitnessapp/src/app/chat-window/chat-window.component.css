@@ -1,0 +1,93 @@
+.chat-window {
+  display: flex;
+  flex-direction: column;
+  width: 1100px; /* Adjust as needed */
+  height: 950px; /* Adjust as needed */
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  overflow: hidden;
+  font-family: Arial, sans-serif;
+  margin-left: 20px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
+  background-color: #fff;
+}
+
+.header svg {
+  width: 40px;
+  height: 40px;
+  margin-right: 10px;
+}
+
+.header p {
+  font-size: 18px;
+  font-weight: bold;
+  margin: 0;
+}
+
+.messages {
+  flex: 1;
+  padding: 10px;
+  overflow-y: auto;
+  background-color: #fff;
+  margin-top: 20px;
+}
+
+.message {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.message svg {
+  width: 30px;
+  height: 30px;
+  margin-right: 10px;
+}
+
+.message p {
+  background-color: #fff;
+  padding: 10px 15px;
+  border-radius: 20px;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+  margin: 0;
+}
+
+.input-bar {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  border-top: 1px solid #ccc;
+  background-color: #fff;
+}
+
+.input-bar input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  margin-right: 10px;
+  outline: none;
+}
+
+.input-bar button {
+  background-color: #007bff;
+  border: none;
+  color: #fff;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.input-bar button i {
+  font-size: 20px;
+}

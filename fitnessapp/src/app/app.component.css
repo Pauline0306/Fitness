@@ -1,0 +1,11 @@
+.container {
+    display: flex;
+    height: 100vh;
+  }
+  
+  .main-content {
+    display: flex;
+    flex: 1;
+    border-left: 1px solid #ccc;
+  }
+  
