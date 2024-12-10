@@ -1,11 +1,11 @@
 import { Component } from '@angular/core';
+import { RouterModule } from '@angular/router'; // Import RouterModule for routing support
 
 @Component({
   selector: 'app-navbar',
-  imports: [],
+  standalone: true, // Assuming standalone components are used
+  imports: [RouterModule], // Include RouterModule for routing links
   templateUrl: './navbar.component.html',
-  styleUrl: './navbar.component.css'
+  styleUrls: ['./navbar.component.css']
 })
-export class NavbarComponent {
-
-}
+export class NavbarComponent {}
