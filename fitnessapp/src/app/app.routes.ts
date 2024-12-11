@@ -6,7 +6,7 @@ import { HomeComponent } from './home/home.component';
 import { RegistrationComponent } from './registration/registration.component';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-
+import { MessagesComponent } from './messages/messages.component';
 
 
 export const routes: Routes = [
@@ -14,7 +14,8 @@ export const routes: Routes = [
     { path: 'login', component: LoginComponent },
     { path: 'about', component: AboutComponent },
     { path: 'home', component: HomeComponent },
-    { path: 'registration', component: RegistrationComponent }
+    { path: 'registration', component: RegistrationComponent },
+    { path: 'messages', component: MessagesComponent },
 
 ];
 

@@ -1,11 +1,14 @@
-.container {
-    display: flex;
-    height: 100vh;
-  }
-  
-  .main-content {
-    display: flex;
-    flex: 1;
-    border-left: 1px solid #ccc;
-  }
-  
+.layout {
+  display: flex; /* Align elements side by side */
+  height: 100vh; /* Full height of the viewport */
+  width: 100vw; /* Full width of the viewport */
+}
+
+app-sidebar {
+  width: 20%; /* Sidebar occupies 20% of the width */
+}
+
+.main-content {
+  flex-grow: 1; /* Remaining width for the routed components */
+  /* Handle overflow */
+}
