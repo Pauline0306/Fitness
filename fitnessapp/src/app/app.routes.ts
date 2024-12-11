@@ -7,7 +7,7 @@ import { RegistrationComponent } from './registration/registration.component';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MessagesComponent } from './messages/messages.component';
-
+import { DashboardComponent } from './dashboard/dashboard.component';
 
 export const routes: Routes = [
     { path: 'admin', component: AdminComponent },
@@ -16,6 +16,7 @@ export const routes: Routes = [
     { path: 'home', component: HomeComponent },
     { path: 'registration', component: RegistrationComponent },
     { path: 'messages', component: MessagesComponent },
+    { path: 'dashboard', component: DashboardComponent },
 
 ];
 

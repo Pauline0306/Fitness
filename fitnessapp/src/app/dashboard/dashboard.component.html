@@ -1,1 +1,16 @@
-<p>dashboard works!</p>
+<div class="trainer-container">
+    <h1>Welcome to <span class="highlight">FitConnect</span></h1>
+    <p>This is our Recommended Trainers that can help you in your fitness journey</p>
+  
+    <div class="trainers">
+      <div class="trainer-card" *ngFor="let trainer of trainers">
+        <div class="trainer-image">
+          <img src="assets/default-profile.png" alt="Trainer" />
+        </div>
+        <h3>{{ trainer.name }}</h3>
+        <p>{{ trainer.description }}</p>
+        <button class="message-btn">Message</button>
+      </div>
+    </div>
+  </div>
+  

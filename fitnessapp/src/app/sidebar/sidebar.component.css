@@ -1,10 +1,14 @@
 .sidebar {
+  position: fixed; /* Makes the sidebar stay fixed to the viewport */
+  top: 0;
+  left: 0;
+  width: 300px; /* Adjust the width of the sidebar as needed */
+  height: 100vh; /* Full viewport height */
+  background-color: #eaf4ff; /* Light blue background */
   display: flex;
   flex-direction: column;
-  background-color: #ffffff; /* White background */
-  height: 100%; /* Full height */
   padding: 20px;
-  width: 100%;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); /* Optional shadow for better separation */
 }
 
 .profile-icon svg {
@@ -14,6 +18,7 @@
 
 .logo {
   text-align: center;
+  margin-bottom: 30px; /* Space between logo and menu */
 }
 
 .logo img {
@@ -24,9 +29,13 @@
 
 .menu {
   list-style: none;
-  padding: 20px;
-  margin: 20px;
+  padding: 0; /* Remove extra padding */
+  margin: 0; /* Remove extra margin */
+  flex-grow: 1; /* Push the menu to occupy remaining space */
+  display: flex;
+  flex-direction: column;
 }
+
 .menu li {
   padding: 15px 20px; /* Adjust padding for better button size */
   cursor: pointer;
@@ -41,7 +50,7 @@
 }
 
 .menu li:hover {
-  background-color: #eaf4ff; /* Light blue background on hover */
+  background-color: #d0e7ff; /* Light blue background on hover */
   box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3); /* Blue glow effect */
 }
 
@@ -53,21 +62,53 @@
 
 .menu li:focus,
 .menu li:active {
-  outline: none;
-  border: none; /* Ensure borders and outlines are removed during focus or active state */
+  outline: none; /* Remove focus outline */
+  border: none; /* Remove border on active state */
 }
 
 button {
   all: unset; /* Reset all button styles to avoid conflicts */
+  cursor: pointer;
+  outline: none; /* Remove focus outline */
 }
 
-.menu li svg {
-  margin-right: 20px;
-  width: 25px;
-  height: 25px;
+.menu li button {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  border: none; /* Remove borders */
+  outline: none; /* Remove focus outline */
+  background-color: transparent; /* Ensure background is transparent */
+  padding: 0; /* Remove any padding added by the browser */
+}
+
+button:focus,
+button:active {
+  outline: none !important; /* Force removal of focus outline */
+  border: none !important; /* Remove border on active state */
+}
+
+.menu li button svg:focus,
+.menu li button svg:active {
+  outline: none !important; /* Remove focus outlines from SVGs */
 }
 
 .profile-icon {
   text-align: center;
-  margin-top: 300px;
+  margin-top: 200px; /* Push the profile icon to the bottom of the sidebar */
+  padding: 200px 0;
+}
+
+.menu-button {
+  display: flex;
+  align-items: center;
+  text-decoration: none; /* Remove underline */
+  color: inherit; /* Use parent font color */
+  padding: 15px 20px; /* Spacing */
+  background-color: transparent; /* No background */
+  border: none; /* Remove border */
+  outline: none; /* Remove focus outline */
+  cursor: pointer;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }

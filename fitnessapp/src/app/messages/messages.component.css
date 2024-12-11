@@ -5,12 +5,15 @@
 }
 
 .message-list {
-  width: 500px;
+  width: 550px;
   border-right: 1px solid #ccc;
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: 100%;
   background-color: #f9f9f9;
+  margin-left: 10px;
+  border-radius: 20px;
+
 }
 
 .message-list .header {
@@ -67,7 +70,7 @@ h3 {
 .chat-window {
   display: flex;
   flex-direction: column;
-  width: 830px; /* Adjust as needed */
+  width: 800px; /* Adjust as needed */
   height: 900px; /* Adjust as needed */
   border: 1px solid #ccc;
   border-radius: 10px;
@@ -147,8 +150,8 @@ h3 {
   background-color: #007bff;
   border: none;
   color: #fff;
-  width: 40px;
-  height: 40px;
+  width:70px;
+  height: 70px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -158,6 +161,7 @@ h3 {
 
 .input-bar button svg {
   font-size: 20px;
+  width: 20px;
 }
 
 /* SVG Styling */
