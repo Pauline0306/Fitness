@@ -1,13 +1,26 @@
-import { Component } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { Component, OnInit } from '@angular/core';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-sidebar',
-  imports: [RouterModule],
   templateUrl: './sidebar.component.html',
-  styleUrl: './sidebar.component.css'
+  styleUrls: ['./sidebar.component.css']
 })
-export class SidebarComponent {
-  
+export class SidebarComponent implements OnInit {
+  userName: string | null = '';
+  userRole: string | null = '';
+  router: any;
 
+  constructor(private authService: AuthService) {}
+
+  ngOnInit(): void {
+    // Get the current user details from AuthService
+    const currentUser = this.authService.currentUserValue;
+    this.userName = currentUser?.name || 'Guest';
+    this.userRole = currentUser?.role || 'Unknown';
+  }
+  logout() {
+    this.authService.logout();
+    this.router.navigate(['/login']);
+  }
 }
