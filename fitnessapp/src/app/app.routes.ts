@@ -3,7 +3,7 @@ import { AdminComponent } from './admin/admin.component';
 import { LoginComponent } from './login/login.component';
 
 import { HomeComponent } from './home/home.component';
-import { RegistrationComponent } from './registration/registration.component';
+import { RegisterComponent } from './registration/registration.component';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DashboardComponent } from './dashboard/dashboard.component';
@@ -11,8 +11,7 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 export const routes: Routes = [
     { path: 'admin', component: AdminComponent },
     { path: 'login', component: LoginComponent },
-    { path: 'home', component: HomeComponent },
-    { path: 'registration', component: RegistrationComponent },
+    { path: 'registration', component: RegisterComponent },
     { path: 'dashboard', component: DashboardComponent },
 ];
 

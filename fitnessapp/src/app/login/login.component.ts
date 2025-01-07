@@ -1,24 +1,65 @@
 import { Component } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-
+import { CommonModule } from '@angular/common';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { Router, RouterModule } from '@angular/router';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [FormsModule], // Add FormsModule here
+  imports: [CommonModule, ReactiveFormsModule, RouterModule],
   templateUrl: './login.component.html',
-  styleUrls: ['./login.component.css']
+  styleUrls: ['./login.component.css'],
 })
 export class LoginComponent {
-  email: string = '';
-  password: string = '';
-  rememberMe: boolean = false;
+  loginForm: FormGroup;
+  loading = false;
+  submitted = false;
+  error = '';
+
+  constructor(
+    private formBuilder: FormBuilder,
+    private router: Router,
+    private authService: AuthService
+  ) {
+    // Redirect to the homepage if the user is already logged in
+    if (this.authService.currentUserValue) {
+      this.router.navigate(['/']);
+    }
+
+    this.loginForm = this.formBuilder.group({
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', [Validators.required, Validators.minLength(6)]],
+    });
+  }
+
+  // Easy access to form controls
+  get f() {
+    return this.loginForm.controls;
+  }
 
   onSubmit() {
-    console.log('Form submitted:', {
-      email: this.email,
-      password: this.password,
-      rememberMe: this.rememberMe
-    });
+    this.submitted = true;
+    this.error = '';
+
+    // Stop if the form is invalid
+    if (this.loginForm.invalid) {
+      return;
+    }
+
+    this.loading = true;
+
+    this.authService
+      .login(this.loginForm.value.email, this.loginForm.value.password)
+      .subscribe({
+        next: () => {
+          // On successful login, redirect to dashboard
+          this.router.navigate(['/dashboard']);
+        },
+        error: (err) => {
+          this.error = err.error?.message || 'Login failed. Please try again.';
+          this.loading = false;
+        },
+      });
   }
 }

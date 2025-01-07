@@ -1,66 +1,60 @@
-<div class="container">
-    <div class="left-section">
-      <div class="logo">
-        <img src="assets/images/FitConnectLogo.png" alt="FitConnect Logo" />
-      </div>
-    </div>
-    <div class="right-section">
-      <div class="registration-box">
-        <h2>Registration</h2>
-        <form (ngSubmit)="onSubmit()">
-          <div class="form-group">
-            <label for="username">Username</label>
-            <input
-              type="text"
-              id="username"
-              [(ngModel)]="username"
-              name="username"
-              placeholder="Enter your username"
-              required
-            />
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-body">
+          <h2 class="text-center mb-4">Register</h2>
+          <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+            <div class="form-group">
+              <label>Name</label>
+              <input type="text" formControlName="name" class="form-control" 
+                     [ngClass]="{ 'is-invalid': submitted && registerForm.get('name')?.errors }" />
+              <div *ngIf="submitted && registerForm.get('name')?.errors" class="invalid-feedback">
+                <div *ngIf="registerForm.get('name')?.errors?.['required']">Name is required</div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Email</label>
+              <input type="email" formControlName="email" class="form-control"
+                     [ngClass]="{ 'is-invalid': submitted && registerForm.get('email')?.errors }" />
+              <div *ngIf="submitted && registerForm.get('email')?.errors" class="invalid-feedback">
+                <div *ngIf="registerForm.get('email')?.errors?.['required']">Email is required</div>
+                <div *ngIf="registerForm.get('email')?.errors?.['email']">Email must be valid</div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Password</label>
+              <input type="password" formControlName="password" class="form-control"
+                     [ngClass]="{ 'is-invalid': submitted && registerForm.get('password')?.errors }" />
+              <div *ngIf="submitted && registerForm.get('password')?.errors" class="invalid-feedback">
+                <div *ngIf="registerForm.get('password')?.errors?.['required']">Password is required</div>
+                <div *ngIf="registerForm.get('password')?.errors?.['minlength']">
+                  Password must be at least 6 characters
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Role</label>
+              <select formControlName="role" class="form-control"
+                      [ngClass]="{ 'is-invalid': submitted && registerForm.get('role')?.errors }">
+                <option value="trainer">Trainer</option>
+                <option value="trainee">Trainee</option>
+              </select>
+              <div *ngIf="submitted && registerForm.get('role')?.errors" class="invalid-feedback">
+                <div *ngIf="registerForm.get('role')?.errors?.['required']">Role is required</div>
+              </div>
+            </div>
+
+            <button class="btn btn-primary btn-block mt-4">Register</button>
+          </form>
+          <div class="text-center mt-3">
+            <a routerLink="/login">Already have an account? Login</a>
           </div>
-          <div class="form-group">
-            <label for="email">Email</label>
-            <input
-              type="email"
-              id="email"
-              [(ngModel)]="email"
-              name="email"
-              placeholder="Enter your email"
-              required
-            />
-          </div>
-          <div class="form-group">
-            <label for="password">Password</label>
-            <input
-              type="password"
-              id="password"
-              [(ngModel)]="password"
-              name="password"
-              placeholder="Create a password"
-              required
-            />
-          </div>
-          <div class="form-group">
-            <label for="role">Role</label>
-            <select id="role" [(ngModel)]="role" name="role">
-              <option value="trainee">Trainee</option>
-              <option value="trainer">Trainer</option>
-            </select>
-          </div>
-          <div class="form-options">
-            <label>
-              <input
-                type="checkbox"
-                [(ngModel)]="termsAccepted"
-                name="termsAccepted"
-                required
-              />
-              I accept the terms & conditions
-            </label>
-          </div>
-          <button type="submit" class="btn btn-primary">Register Now</button>
-        </form>
+        </div>
       </div>
     </div>
   </div>
+</div>

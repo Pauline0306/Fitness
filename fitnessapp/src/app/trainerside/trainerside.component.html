@@ -2,8 +2,8 @@
   <button (click)="logout()">Logout</button>
 
 <div *ngIf="isTrainee">
-  <h2>Available Trainers</h2>
-  <div *ngFor="let trainer of trainers">
-    {{ trainer.name }}
+  <h2>Available Trainees</h2>
+  <div *ngFor="let trainees of trainee">
+    {{ trainees.name }}
   </div>
 </div>

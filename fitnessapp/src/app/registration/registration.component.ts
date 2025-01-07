@@ -1,30 +1,51 @@
 import { Component } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { Router, RouterModule } from '@angular/router';
+import { AuthService } from '../services/auth.service';
+
 
 @Component({
-  selector: 'app-registration',
+  selector: 'app-register',
   standalone: true,
-  imports: [FormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule],
   templateUrl: './registration.component.html',
-  styleUrls: ['./registration.component.css']
+  styleUrl: './registration.component.css'
 })
-export class RegistrationComponent {
-  username: string = '';
-  email: string = '';
-  password: string = '';
-  role: string = 'trainee';
-  termsAccepted: boolean = false;
+export class RegisterComponent {
+  registerForm: FormGroup;
+  submitted = false;
+
+  constructor(
+    private formBuilder: FormBuilder,
+    private authService: AuthService,
+    private router: Router
+  ) {
+    this.registerForm = this.formBuilder.group({
+      name: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', [Validators.required, Validators.minLength(6)]],
+      role: ['', Validators.required]
+    });
+  }
+
+  get f() { return this.registerForm.controls; }
 
   onSubmit() {
-    if (this.termsAccepted) {
-      console.log('Registration Form Submitted:', {
-        username: this.username,
-        email: this.email,
-        password: this.password,
-        role: this.role
-      });
-    } else {
-      alert('Please accept the terms and conditions.');
+    this.submitted = true;
+
+    if (this.registerForm.invalid) {
+      return;
     }
+
+    this.authService.register(this.registerForm.value)
+      .subscribe({
+        next: () => {
+          this.router.navigate(['/login']);
+        },
+        error: error => {
+          console.error('Registration failed:', error);
+        }
+      });
   }
 }
