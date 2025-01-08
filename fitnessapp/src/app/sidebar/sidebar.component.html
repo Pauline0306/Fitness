@@ -7,11 +7,14 @@
 
   <!-- Navigation Links -->
   <nav class="nav">
-    <a class="nav-item" [routerLink]="homeLink">
+    <!-- Home Link -->
+    <a class="nav-item" [routerLink]="homeLink" routerLinkActive="active">
       <img src="assets/images/home.png" alt="Home Icon" class="nav-icon" />
       <span>Home</span>
     </a>
-    <a class="nav-item" routerLink="/messages">
+
+    <!-- Messages Link -->
+    <a class="nav-item" routerLink="/messages" routerLinkActive="active">
       <img src="assets/images/chat.png" alt="Messages Icon" class="nav-icon" />
       <span>Messages</span>
     </a>
@@ -22,12 +25,10 @@
     <p>{{ userName }}</p>
     <small>{{ userRole }}</small>
     <div class="logout-btn">
-      <img
-        src="assets/images/switch.png"
-        alt="Logout Icon"
-        class="logout-icon"
-        (click)="logout()"
-      />
+      <button class="logout-button" (click)="logout()">
+        <span>Logout</span>
+        <img src="assets/images/logout.png" alt="Logout Icon" class="logout-icon" />
+      </button>
     </div>
   </div>
 </div>

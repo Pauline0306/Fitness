@@ -90,17 +90,41 @@
   font-size: 1.1em;
   color: #000000;
   font-weight: bold;
+  text-transform: uppercase;
 }
 
 .logout-btn {
-  position: relative;
-  display: inline-block;
-  margin-top: 30px;
+  margin-top: 10px;
+  text-align: center;
 }
 
-.logout-icon {
-  display: block;
-  width: 40px;
-  height: auto;
+.logout-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background-color: #ff0000; /* Blue button color */
+  border: none;
+  border-radius: 5px;
+  color: #fff;
+  font-size: 17px;
+  font-weight: bold;
   cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-bottom: 10px;
+  margin-top: 10px;
+}
+
+.logout-button img {
+  width: 16px;
+  height: 16px;
+}
+
+.logout-button:hover {
+  background-color: #0056b3; /* Darker blue on hover */
+}
+
+.logout-button span {
+  margin-right: 8px; /* Space between text and icon */
 }

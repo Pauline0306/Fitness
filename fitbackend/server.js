@@ -49,6 +49,26 @@ connection.query('CREATE DATABASE IF NOT EXISTS training_db', (err) => {
             }
             console.log('Users table created or already exists');
         });
+          const createMessagesTableQuery = `
+            CREATE TABLE IF NOT EXISTS messages (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            sender_id INT NOT NULL,
+            receiver_id INT NOT NULL,
+            content TEXT NOT NULL,
+            is_read BOOLEAN DEFAULT FALSE,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (sender_id) REFERENCES users(id),
+            FOREIGN KEY (receiver_id) REFERENCES users(id)
+            )`;
+
+connection.query(createMessagesTableQuery, (err) => {
+    if (err) {
+        console.error('Error creating messages table:', err);
+        return;
+    }
+    console.log('Messages table created or already exists');
+});
+
     });
 });
 
@@ -114,7 +134,7 @@ app.post('/api/auth/login', async (req, res) => {
             role: user.role 
           },
           'your_jwt_secret',
-          { expiresIn: '1h' }
+          { expiresIn: '5h' }
         );
 
         res.json({ 
@@ -197,6 +217,167 @@ app.get('/api/trainee', (req, res) => {
     return res.status(401).json({ message: 'Invalid token' });
   }
 });
+
+app.post('/api/messages', (req, res) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) {
+      return res.status(401).json({ message: 'Unauthorized' });
+  }
+
+  try {
+      const decoded = jwt.verify(token, 'your_jwt_secret');
+      const { receiverId, content } = req.body;
+
+      const query = `
+          INSERT INTO messages (sender_id, receiver_id, content)
+          VALUES (?, ?, ?)
+      `;
+
+      connection.query(
+          query,
+          [decoded.userId, receiverId, content],
+          (err, results) => {
+              if (err) {
+                  console.error('Error sending message:', err);
+                  return res.status(500).json({ message: 'Error sending message' });
+              }
+              res.status(201).json({ message: 'Message sent successfully' });
+          }
+      );
+  } catch (err) {
+      console.error('Token verification failed:', err);
+      return res.status(401).json({ message: 'Invalid token' });
+  }
+});
+
+app.get('/api/messages/:userId', (req, res) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) {
+      return res.status(401).json({ message: 'Unauthorized' });
+  }
+
+  try {
+      const decoded = jwt.verify(token, 'your_jwt_secret');
+      const otherUserId = req.params.userId;
+
+      const query = `
+          SELECT 
+              m.*,
+              sender.name as sender_name,
+              receiver.name as receiver_name
+          FROM messages m
+          JOIN users sender ON m.sender_id = sender.id
+          JOIN users receiver ON m.receiver_id = receiver.id
+          WHERE 
+              (m.sender_id = ? AND m.receiver_id = ?) 
+              OR 
+              (m.sender_id = ? AND m.receiver_id = ?)
+          ORDER BY m.created_at ASC
+      `;
+
+      connection.query(
+          query,
+          [decoded.userId, otherUserId, otherUserId, decoded.userId],
+          (err, results) => {
+              if (err) {
+                  console.error('Error fetching messages:', err);
+                  return res.status(500).json({ message: 'Error fetching messages' });
+              }
+              res.json(results);
+          }
+      );
+  } catch (err) {
+      console.error('Token verification failed:', err);
+      return res.status(401).json({ message: 'Invalid token' });
+  }
+});
+
+
+// Mark message as read
+app.put('/api/messages/:messageId/read', (req, res) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) {
+      return res.status(401).json({ message: 'Unauthorized' });
+  }
+
+  try {
+      const decoded = jwt.verify(token, 'your_jwt_secret');
+      const messageId = req.params.messageId;
+
+      const query = `
+          UPDATE messages 
+          SET is_read = TRUE 
+          WHERE id = ? AND receiver_id = ?
+      `;
+
+      connection.query(
+          query,
+          [messageId, decoded.userId],
+          (err, results) => {
+              if (err) {
+                  console.error('Error marking message as read:', err);
+                  return res.status(500).json({ message: 'Error marking message as read' });
+              }
+              res.json({ message: 'Message marked as read' });
+          }
+      );
+  } catch (err) {
+      console.error('Token verification failed:', err);
+      return res.status(401).json({ message: 'Invalid token' });
+  }
+});
+
+app.get('/api/conversations', (req, res) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, 'your_jwt_secret');
+    const role = decoded.role;
+
+    let roleToFetch = '';
+    if (role === 'trainer') {
+      roleToFetch = 'trainee';
+    } else if (role === 'trainee') {
+      roleToFetch = 'trainer';
+    } else {
+      return res.status(403).json({ message: 'Invalid user role' });
+    }
+
+    const query = `
+      SELECT 
+        u.id, 
+        u.name, 
+        u.role,
+        COALESCE(
+          (SELECT m.content 
+           FROM messages m 
+           WHERE m.sender_id = u.id OR m.receiver_id = u.id 
+           ORDER BY m.created_at DESC 
+           LIMIT 1
+          ), 
+          'No messages yet'
+        ) AS lastMessage
+      FROM users u
+      WHERE u.role = ?
+    `;
+
+    connection.query(query, [roleToFetch], (err, results) => {
+      if (err) {
+        console.error('Error fetching conversations:', err);
+        return res.status(500).json({ message: 'Error fetching conversations' });
+      }
+
+      res.json(results);
+    });
+  } catch (err) {
+    console.error('Token verification failed:', err);
+    return res.status(401).json({ message: 'Invalid token' });
+  }
+});
+
 
 
 

@@ -1,2 +1,55 @@
-<p>messages works!</p>
-<app-sidebar></app-sidebar>
+<div class="chat-container">
+    <!-- Sidebar: Conversations -->
+    <app-sidebar></app-sidebar>
+    
+    <div class="conversation-list">
+      <h1>Conversations</h1>
+      
+      <ng-container *ngFor="let group of groupedConversations">
+        <h3>{{ group.role }}s:</h3>
+        <ul>
+          <li
+            *ngFor="let conversation of group.conversations"
+            (click)="selectConversation(conversation)"
+            [class.active]="selectedUser?.id === conversation.id"
+          >
+            <strong>{{ conversation.name }}</strong>
+            <p *ngIf="conversation.lastMessage">{{ conversation.lastMessage }}</p>
+          </li>
+        </ul>
+      </ng-container>
+    </div>
+  
+    <!-- Main Chat Section -->
+    <div class="chat-box" *ngIf="selectedUser">
+        <div class="chat-header">
+            <h3 class="user-name">{{ selectedUser.name }}</h3>
+            <button class="close-button" (click)="deselectUser()">
+              <span>×</span>
+            </button>
+          </div>
+  
+      <div class="messages">
+        <div
+          *ngFor="let message of messages"
+          [ngClass]="{
+            'sent': message.sender_id === currentUser?.id,
+            'received': message.receiver_id === currentUser?.id
+          }"
+          class="message-item"
+        >
+          {{ message.content }}
+        </div>
+      </div>
+  
+      <div class="message-form">
+        <input
+          type="text"
+          [(ngModel)]="newMessage"
+          placeholder="Type your message..."
+        />
+        <button (click)="sendMessage()"> </button>
+      </div>
+    </div>
+  </div>
+  

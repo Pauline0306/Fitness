@@ -11,7 +11,7 @@ import { SidebarComponent } from "../sidebar/sidebar.component";
   styleUrl: './trainerside.component.css'
 })
 export class TrainersideComponent {
-  trainee: { name: string; email: string }[] = []; // Explicitly define structure
+  trainees: { id: number; name: string; email: string }[] = []; // Added id to structure
   error: string = '';
   isTrainer: boolean = false;
 
@@ -24,10 +24,11 @@ export class TrainersideComponent {
     if (this.isTrainer) {
       this.authService.getTrainee().subscribe({
         next: (data) => {
-          // Map the data to ensure proper structure
-          this.trainee = data.map((trainee) => ({
-            name: trainee.name, // Full name
-            email: trainee.email, // Email
+          // Ensure trainees include an id field
+          this.trainees = data.map((trainee) => ({
+            id: trainee.id,     // Map the id from the API
+            name: trainee.name, // Map the name
+            email: trainee.email // Map the email
           }));
         },
         error: (err) => {
@@ -40,5 +41,11 @@ export class TrainersideComponent {
   logout() {
     this.authService.logout();
     this.router.navigate(['/login']);
+  }
+
+  navigateToMessages(userId: number, userName: string) {
+    this.router.navigate(['/messages'], {
+      queryParams: { userId, userName }
+    });
   }
 }

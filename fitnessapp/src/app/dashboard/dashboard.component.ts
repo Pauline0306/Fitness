@@ -3,15 +3,17 @@ import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { CommonModule } from '@angular/common';
 import { SidebarComponent } from "../sidebar/sidebar.component";
+import { FormsModule } from '@angular/forms';
+
 
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css'],
-  imports: [CommonModule, SidebarComponent]
+  imports: [CommonModule, SidebarComponent, FormsModule]
 })
 export class DashboardComponent {
-  trainers: { name: string; email: string }[] = []; // Explicitly define structure
+  trainers: { id: number; name: string; email: string }[] = []; // Include id in the structure
   error: string = '';
   isTrainee: boolean = false;
 
@@ -26,8 +28,9 @@ export class DashboardComponent {
         next: (data) => {
           // Map the data to ensure proper structure
           this.trainers = data.map((trainer) => ({
-            name: trainer.name, // Full name (first and last name)
-            email: trainer.email, // Email
+            id: trainer.id, // Add id here
+            name: trainer.name,
+            email: trainer.email,
           }));
         },
         error: (err) => {
@@ -40,5 +43,11 @@ export class DashboardComponent {
   logout() {
     this.authService.logout();
     this.router.navigate(['/login']);
+  }
+
+  navigateToMessages(userId: number, userName: string) {
+    this.router.navigate(['/messages'], {
+      queryParams: { userId, userName }
+    });
   }
 }

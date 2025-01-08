@@ -1,19 +1,219 @@
-html, body {
-    margin: 0; /* Remove default margins for the entire page */
-    padding: 0; /* Remove default padding for the entire page */
-    height: 100%; /* Ensure the parent elements take full height */
-  }
+
+.parent-container {
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+
+
+
+.chat-container {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  font-family: 'Montserrat', sans-serif;
   
-  p {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-wrap: nowrap;
-    padding: 0;
-    margin: 0; /* Remove top margin */
-    background-color: #f8f9fa;
-    height: 100vh;
-    font-family: 'Montserrat', sans-serif;
-    font-size: 1.5rem;
-    text-align: center;
-  }
+}
+
+/* Sidebar Styling */
+.conversation-list {
+  width: 50%; /* Adjust width of the sidebar */
+  background-color: #f4f4f4;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #ddd;
+  overflow-y: auto;
+  padding: 10px;
+  flex: 0 0 30%; /* Sidebar fixed at 30% */
+  margin-left: 250px;
+  border-radius: 20px;
+  outline: 2px solid #ccc; /* Adds a visible outline */
+  height: 900px;
+  margin-top: 30px;
+
+}
+
+.conversation-list h1 {
+  padding: 10px;
+  margin: 0;
+  
+  border-bottom: 1px solid #ddd;
+  margin-left: 0; /* Removes extra spacing */
+  border-radius: 0; /* Removes rounded corners */
+  outline: none;
+  margin-bottom: 20px;
+}
+
+.conversation-list h3{
+
+  text-transform: capitalize;
+}
+.conversation-list h2 {
+  padding: 10px;
+  margin: 0;
+  margin-left: 0; /* Removes extra spacing */
+  border-radius: 0; /* Removes rounded corners */
+  outline: none;
+  margin-bottom: 20px;
+}
+
+.conversation-list ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.conversation-list li {
+  padding: 15px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  border-radius: 20px;
+}
+
+.conversation-list li:hover {
+  background-color: #eaeaea;
+  border-radius: 20px;
+}
+
+.conversation-list li.active {
+  background-color: #ddd;
+  font-weight: bold;
+  border-radius: 20px;
+}
+
+.conversation-list li p {
+  margin: 5px 0 0;
+  color: #666;
+  font-size: 14px;
+}
+/* Main Chat Section */
+.chat-box {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  outline: 2px solid #ccc; /* Adds an outline to the chat box */
+  margin: 10px;
+  border-radius: 8px; /* Optional: Adds rounded corners */
+  margin-bottom: 50px;
+  margin-top: 30px;
+}
+
+.chat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+  background-color: #f9f9f9;
+}
+
+.chat-header h1 {
+  margin: 0;
+  font-size: 18px;
+  color: #333;
+}
+
+.chat-header button {
+  background: #f70000;
+  border: none;
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.chat-header button:hover {
+  background-color: #fa3b3b;
+}
+
+.messages {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 10px;
+  background-color: #f9f9f9;
+}
+
+.message-item {
+  max-width: 60%;
+  margin-bottom: 10px;
+  padding: 10px;
+  border-radius: 10px;
+  font-size: 14px;
+}
+
+.message-item.sent {
+  background-color: #dcf8c6;
+  margin-left: auto;
+}
+
+.message-item.received {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  margin-right: auto;
+}
+
+
+.message-form {
+  display: flex;
+  padding: 10px;
+  border-top: 1px solid #ddd; /* Merges visually with chat box */
+  background: #f9f9f9;
+  border-bottom-left-radius: 8px; /* Matches chat box corner */
+  border-bottom-right-radius: 8px; /* Matches chat box corner */
+}
+
+.message-form input {
+  flex-grow: 1;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  margin-right: 10px;
+}
+
+.message-form button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.message-form button::after {
+  content: "➤";
+  font-size: 30px;
+  transform: rotate(360deg);
+  margin-left: 3px;
+}
+
+.user-name {
+  margin-left: 20px;
+}
+
+.chat-header {
+  display: flex;
+  
+  justify-content: space-between;
+  padding: 10px;
+}
+
+
+ 
+ .close-button span {
+  font-size: 32px;
+  line-height: 1;
+  color: white;
+ }
+ 
+ .close-button:hover {
+  background-color: #ff0000;
+ }
