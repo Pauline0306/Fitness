@@ -3,11 +3,12 @@
     justify-content:  center;
     align-items: center;
     flex-wrap: wrap;
-    padding: 20px;
+    padding: 0;
     background-color: #f8f9fa;
     height: calc(80vh - 60px);
     position: relative;
-    margin-top: 0.5px;
+    top: 0;
+    font-family: 'Montserrat', sans-serif;
   }
   
   .text-section {

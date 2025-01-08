@@ -22,7 +22,6 @@ export class LoginComponent {
     private router: Router,
     private authService: AuthService
   ) {
-    // Redirect to the homepage if the user is already logged in
     if (this.authService.currentUserValue) {
       this.router.navigate(['/']);
     }
@@ -33,7 +32,6 @@ export class LoginComponent {
     });
   }
 
-  // Easy access to form controls
   get f() {
     return this.loginForm.controls;
   }
@@ -42,7 +40,6 @@ export class LoginComponent {
     this.submitted = true;
     this.error = '';
 
-    // Stop if the form is invalid
     if (this.loginForm.invalid) {
       return;
     }
@@ -52,9 +49,15 @@ export class LoginComponent {
     this.authService
       .login(this.loginForm.value.email, this.loginForm.value.password)
       .subscribe({
-        next: () => {
-          // On successful login, redirect to dashboard
-          this.router.navigate(['/dashboard']);
+        next: (user) => {
+          // Redirect based on user role
+          if (user.role === 'trainee') {
+            this.router.navigate(['/dashboard']);
+          } else if (user.role === 'trainer') {
+            this.router.navigate(['/trainerside']);
+          } else {
+            this.error = 'Unknown user role';
+          }
         },
         error: (err) => {
           this.error = err.error?.message || 'Login failed. Please try again.';

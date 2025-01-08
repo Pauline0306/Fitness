@@ -1,32 +1,33 @@
 <div class="sidebar">
-    <!-- Logo -->
-    <div class="logo">
-      <img src="assets/images/FitConnectLogo.png" alt="FitConnect Logo" class="logo-img">
-      <h1>Fit<span>Connect</span></h1>
-    </div>
-  
-    <!-- Navigation Links -->
-    <nav class="nav">
-        <button class="nav-item" routerLink="/home">
-          <img src="assets/images/home.png" alt="Home Icon" class="nav-icon" />
-          Home
-        </button>
-        <button class="nav-item" routerLink="/messages">
-          <img src="assets/images/chat.png" alt="Messages Icon" class="nav-icon" />
-          Messages
-        </button>
-      </nav>
-      
-  
-    <!-- Profile Section -->
-        <div class="logout-btn">
-    <button class ="btn"(click)="logout()"></button>
-    <img src="assets/images/switch.png" alt="logout" class="logout-icon">
-        </div>
-    <div class="profile">
-      <p>{{ userName }}</p>
-      <small>{{ userRole }}</small>
-    </div>
-    
+  <!-- Logo -->
+  <div class="logo">
+    <img src="assets/images/FitConnectLogo.png" alt="FitConnect Logo" class="logo-img" />
+    <h1>Fit<span>Connect</span></h1>
   </div>
-  
+
+  <!-- Navigation Links -->
+  <nav class="nav">
+    <a class="nav-item" [routerLink]="homeLink">
+      <img src="assets/images/home.png" alt="Home Icon" class="nav-icon" />
+      <span>Home</span>
+    </a>
+    <a class="nav-item" routerLink="/messages">
+      <img src="assets/images/chat.png" alt="Messages Icon" class="nav-icon" />
+      <span>Messages</span>
+    </a>
+  </nav>
+
+  <!-- Profile Section -->
+  <div class="profile">
+    <p>{{ userName }}</p>
+    <small>{{ userRole }}</small>
+    <div class="logout-btn">
+      <img
+        src="assets/images/switch.png"
+        alt="Logout Icon"
+        class="logout-icon"
+        (click)="logout()"
+      />
+    </div>
+  </div>
+</div>
