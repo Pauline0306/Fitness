@@ -1,38 +1,24 @@
 import { Component, OnInit } from '@angular/core';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
-import { SidebarComponent } from "./sidebar/sidebar.component";
+import { SidebarComponent } from './sidebar/sidebar.component';
 import { CommonModule } from '@angular/common';
-import { DashboardComponent } from "./dashboard/dashboard.component";
-
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, CommonModule],
+  imports: [RouterOutlet, CommonModule, SidebarComponent],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.css'
+  styleUrls: ['./app.component.css'],
 })
 export class AppComponent implements OnInit {
-  title(title: any) {
-    throw new Error('Method not implemented.');
-  }
-  showNavbar = true; // Controls visibility of the navbar
-  showSidebar = false; // Controls visibility of the sidebar
+  showSidebar = false;
 
   constructor(private router: Router) {}
 
   ngOnInit(): void {
-    // Listen to route changes
     this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
-        // Check the current route
-        if (event.url === '/messages', '/dashboard') {
-          this.showNavbar = false; // Hide navbar
-          this.showSidebar = true; // Show sidebar
-        } else {
-          this.showNavbar = true; // Show navbar
-          this.showSidebar = false; // Hide sidebar
-        }
+        this.showSidebar = ['/messages', '/dashboard', '/trainerside'].includes(event.url);
       }
     });
   }

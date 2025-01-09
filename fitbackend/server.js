@@ -8,6 +8,7 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
+
 // MySQL connection
 const connection = mysql.createConnection({
     host: 'localhost',
@@ -350,11 +351,12 @@ app.get('/api/conversations', (req, res) => {
       SELECT 
         u.id, 
         u.name, 
+        u.email,  -- Include email field in the result
         u.role,
         COALESCE(
           (SELECT m.content 
            FROM messages m 
-           WHERE m.sender_id = u.id OR m.receiver_id = u.id 
+           WHERE (m.sender_id = u.id AND m.receiver_id = ?) OR (m.sender_id = ? AND m.receiver_id = u.id)
            ORDER BY m.created_at DESC 
            LIMIT 1
           ), 
@@ -364,13 +366,20 @@ app.get('/api/conversations', (req, res) => {
       WHERE u.role = ?
     `;
 
-    connection.query(query, [roleToFetch], (err, results) => {
+    connection.query(query, [decoded.userId, decoded.userId, roleToFetch], (err, results) => {
       if (err) {
         console.error('Error fetching conversations:', err);
         return res.status(500).json({ message: 'Error fetching conversations' });
       }
 
-      res.json(results);
+      // Return email with other conversation details
+      res.json(results.map(conversation => ({
+        id: conversation.id,
+        name: conversation.name,
+        email: conversation.email || 'No email provided', // Default to 'No email provided'
+        role: conversation.role,
+        lastMessage: conversation.lastMessage
+      })));
     });
   } catch (err) {
     console.error('Token verification failed:', err);

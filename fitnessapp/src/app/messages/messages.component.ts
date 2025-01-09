@@ -62,7 +62,7 @@ export class MessagesComponent implements OnInit {
           id: conv.id,
           name: conv.name,
           role: conv.role,
-          lastMessage: conv.lastMessage || 'No messages yet',
+          email: conv.email || 'No email provided', // Use email instead of lastMessage
         });
         return acc;
       }, {});

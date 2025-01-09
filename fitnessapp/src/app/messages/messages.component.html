@@ -4,7 +4,7 @@
     
     <div class="conversation-list">
       <h1>Conversations</h1>
-      
+    
       <ng-container *ngFor="let group of groupedConversations">
         <h3>{{ group.role }}s:</h3>
         <ul>
@@ -14,11 +14,12 @@
             [class.active]="selectedUser?.id === conversation.id"
           >
             <strong>{{ conversation.name }}</strong>
-            <p *ngIf="conversation.lastMessage">{{ conversation.lastMessage }}</p>
+            <p *ngIf="conversation.email">{{ conversation.email }}</p>
           </li>
         </ul>
       </ng-container>
     </div>
+    
   
     <!-- Main Chat Section -->
     <div class="chat-box" *ngIf="selectedUser">

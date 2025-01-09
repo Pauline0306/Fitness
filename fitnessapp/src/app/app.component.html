@@ -1,6 +1,6 @@
-
-
-  
-  <div class="main-content">
-  <router-outlet></router-outlet> <!-- Displays the routed component -->
+<div class="app-layout">
+  <app-sidebar *ngIf="showSidebar"></app-sidebar>
+  <main [class.sidebar-visible]="showSidebar">
+    <router-outlet></router-outlet>
+  </main>
 </div>

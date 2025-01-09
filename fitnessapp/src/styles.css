@@ -1,1 +1,29 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
+
+.swal2-popup {
+    font-family: 'Montserrat', sans-serif !important; /* Set font */
+    border-radius: 15px; /* Round corners */
+    background-color: #f9f9f9; /* Light background */
+  }
+  
+  .swal2-title {
+    font-size: 24px; /* Customize title size */
+    color: #333; /* Dark text color */
+  }
+  
+  .swal2-html-container {
+    font-size: 16px; /* Customize text size */
+    color: #555; /* Slightly lighter text color */
+  }
+  
+  .swal2-confirm {
+    background-color: #3085d6 !important; /* Confirm button color */
+    color: #fff !important; /* White text */
+    border-radius: 5px; /* Rounded confirm button */
+  }
+  
+  .swal2-cancel {
+    background-color: #d33 !important; /* Cancel button color */
+    color: #fff !important; /* White text */
+    border-radius: 5px; /* Rounded cancel button */
+  }
