@@ -202,6 +202,37 @@ app.put('/api/bookings/:bookingId/status', (req, res) => {
   }
 });
 
+app.get('/api/bookings/accepted-trainers', (req, res) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) return res.status(401).json({ message: 'Unauthorized' });
+
+  try {
+      const decoded = jwt.verify(token, 'your_jwt_secret');
+      if (decoded.role !== 'trainee') return res.status(403).json({ message: 'Only trainees can view accepted trainers.' });
+
+      connection.query(
+          `
+          SELECT u.id, u.name, u.email 
+          FROM bookings b
+          JOIN users u ON b.trainer_id = u.id
+          WHERE b.trainee_id = ? AND b.status = 'accepted'
+          `,
+          [decoded.userId],
+          (err, results) => {
+              if (err) {
+                  console.error('Error fetching accepted trainers:', err);
+                  return res.status(500).json({ message: 'Error fetching accepted trainers.' });
+              }
+              res.json(results);
+          }
+      );
+  } catch (err) {
+      console.error('Token verification failed:', err);
+      res.status(401).json({ message: 'Invalid token' });
+  }
+});
+
+
 // Register endpoint
 app.post('/api/auth/register', async (req, res) => {
   try {
