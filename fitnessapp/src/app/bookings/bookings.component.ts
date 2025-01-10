@@ -21,8 +21,9 @@ interface Booking {
 })
 export class BookingsComponent implements OnInit {
   bookings: Booking[] = [];
+  acceptedTrainers: Booking[] = []; // List for trainers with accepted bookings
 
-  constructor(private authService: AuthService, private http: HttpClient) {} 
+  constructor(private authService: AuthService, private http: HttpClient) {}
 
   ngOnInit(): void {
     this.loadBookings();
@@ -31,12 +32,21 @@ export class BookingsComponent implements OnInit {
   loadBookings(): void {
     this.authService.getBookings().subscribe({
       next: (response) => {
-        this.bookings = response;
-        console.log('Bookings loaded:', this.bookings);
+        // Assign and sort bookings
+        this.bookings = response.sort((a: Booking, b: Booking) => {
+          if (a.status === 'accepted' && b.status !== 'accepted') return -1;
+          if (b.status === 'accepted' && a.status !== 'accepted') return 1;
+          return 0;
+        });
+  
+        // Filter accepted trainers
+        this.acceptedTrainers = this.bookings.filter((booking: Booking) => booking.status === 'accepted');
+        console.log('Accepted Trainers:', this.acceptedTrainers);
       },
       error: (error) => {
         console.error('Error loading bookings:', error);
       }
     });
   }
+  
 }

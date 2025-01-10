@@ -1,8 +1,11 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
+import { BehaviorSubject, Observable, throwError } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 import { User } from '../models/user.model';
+import { BookingResponse } from '../models/booking-response';
+
+
 
 @Injectable({
   providedIn: 'root',
@@ -95,16 +98,36 @@ bookTrainer(trainerId: number): Observable<any> {
 }
 
 
-updateBookingStatus(bookingId: number, status: string): Observable<any> {
-  return this.http.put(`${this.apiUrl}/bookings/${bookingId}/status`, { status }, {
-    headers: this.getAuthHeaders()
-  });
+updateBookingStatus(bookingId: number, status: string): Observable<BookingResponse> {
+  if (!bookingId) {
+    return throwError(() => new Error('Booking ID is required'));
+  }
+
+  const url = `${this.apiUrl}/bookings/${bookingId}/status`;
+  console.log('Updating booking status:', { url, bookingId, status }); // Debug log
+
+  return this.http.put<BookingResponse>(
+    url,
+    { status },
+    { headers: this.getAuthHeaders() }
+  ).pipe(
+    catchError((error: HttpErrorResponse) => {
+      console.error('Error updating booking:', error); // Log the error
+      return throwError(() => new Error(error.error?.message || 'Failed to update booking status'));
+    })
+  );
 }
-getTrainerBookings(): Observable<any> {
-  return this.http.get(`${this.apiUrl}/bookings`, {
-    headers: this.getAuthHeaders()
-  });
-}
+
+getTrainerBookings(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/bookings`, {
+      headers: this.getAuthHeaders()
+    }).pipe(
+      catchError((error: HttpErrorResponse) => {
+        console.error('Error fetching bookings:', error);
+        return throwError(() => new Error(error.error?.message || 'Failed to fetch bookings'));
+      })
+    );
+  }
 getBookings(): Observable<any> {
   return this.http.get(`${this.apiUrl}/bookings`, {
     headers: this.getAuthHeaders()

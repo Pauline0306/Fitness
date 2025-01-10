@@ -2,12 +2,13 @@
 
 <div class="layout">
     
-    <h2>Trainer Bookings</h2>
-    <div *ngFor="let booking of bookings">
-      <p><strong>{{ booking.traineeName }}</strong> - {{ booking.traineeEmail }}</p>
-      <p>Status: {{ booking.status }}</p>
-      <button (click)="updateBookingStatus(booking.bookingId, 'accepted')">Accept</button>
-      <button (click)="updateBookingStatus(booking.bookingId, 'rejected')">Reject</button>
-    </div>
+  <div *ngFor="let booking of bookings">
+    <p><strong>{{ booking.trainee_name }}</strong> - {{ booking.id }}</p>
+    <p>Status: {{ booking.status }}</p>
+    <button (click)="updateBookingStatus(booking.id, 'accepted')">Accept</button>
+    <button (click)="updateBookingStatus(booking.id, 'rejected')">Reject</button>
+  </div>
+  
+  
   </div>
   

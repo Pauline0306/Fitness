@@ -19,19 +19,27 @@ bookings: any;
   constructor(private authService: AuthService, private router: Router) {}
 
   updateBookingStatus(bookingId: number, status: string) {
+    console.log(`Updating status for booking ID: ${bookingId} to ${status}`); // Debug log
     this.authService.updateBookingStatus(bookingId, status).subscribe({
       next: () => {
         alert(`Booking ${status}`);
         this.loadBookings(); // Reload bookings
       },
-      error: () => alert('Failed to update booking status'),
+      error: (err) => {
+        console.error('Failed to update booking status:', err); // Log detailed error
+        alert('Failed to update booking status');
+      },
     });
   }
   
   
+  
   loadBookings() {
     this.authService.getTrainerBookings().subscribe({
-      next: (data) => (this.bookings = data),
+      next: (data) => {
+        console.log('Bookings data:', data); // Debug log
+        this.bookings = data;
+      },
       error: (err) => console.error('Error fetching bookings:', err),
     });
   }
