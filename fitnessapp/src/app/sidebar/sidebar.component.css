@@ -76,7 +76,8 @@
 
 .profile {
   text-align: center;
-  margin-bottom: 80px;
+  margin-bottom: 50px; /* Adjusted from 80px */
+  margin-top: -20px;   /* New negative margin for upward movement */
 }
 
 .profile p {
@@ -92,6 +93,7 @@
   font-weight: bold;
   text-transform: uppercase;
 }
+
 
 .logout-btn {
   margin-top: 10px;

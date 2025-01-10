@@ -1,0 +1,18 @@
+<div class="layout">
+    <app-sidebar></app-sidebar>
+    <div class="dashboard">
+        <h2>Your Bookings</h2>
+        
+        <div *ngIf="bookings.length > 0">
+            <div class="booking-box" *ngFor="let booking of bookings">
+                <h3>{{ booking.opposite_name }}</h3>
+                <p>Status: <span [ngClass]="booking.status">{{ booking.status }}</span></p>
+                <p>Booked on: {{ booking.created_at | date:'medium' }}</p>
+            </div>
+        </div>
+        
+        <div *ngIf="bookings.length === 0">
+            <p>You don't have any bookings yet.</p>
+        </div>
+    </div>
+</div>

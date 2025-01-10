@@ -10,7 +10,7 @@
           <h3>{{ trainer.name }}</h3>
           <p>{{ trainer.email }}</p>
           <div class="button-group">
-            <button class="btn book-btn">Book</button>
+            <button class="btn book-btn" (click)="bookTrainer(trainer.id, trainer.name)">Book</button>
             <button class="btn message-btn" (click)="navigateToMessages(trainer.id, trainer.name)">
               Message
             </button>

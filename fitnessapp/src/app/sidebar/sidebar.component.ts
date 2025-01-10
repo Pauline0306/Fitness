@@ -9,7 +9,7 @@ import Swal from 'sweetalert2';
   templateUrl: './sidebar.component.html',
   styleUrls: ['./sidebar.component.css'],
   standalone: true,
-  imports: [RouterModule,CommonModule],
+  imports: [RouterModule, CommonModule],
 })
 export class SidebarComponent implements OnInit {
   userName: string | null = '';
@@ -34,10 +34,10 @@ export class SidebarComponent implements OnInit {
       cancelButtonColor: '#d33',
       confirmButtonText: 'Yes, log me out!',
       customClass: {
-        popup: 'swal2-popup', // Add custom font and background
-        title: 'swal2-title', // Add styled title
-        confirmButton: 'swal2-confirm', // Styled confirm button
-        cancelButton: 'swal2-cancel', // Styled cancel button
+        popup: 'swal2-popup',
+        title: 'swal2-title',
+        confirmButton: 'swal2-confirm',
+        cancelButton: 'swal2-cancel',
       },
     }).then((result) => {
       if (result.isConfirmed) {
@@ -56,7 +56,6 @@ export class SidebarComponent implements OnInit {
       }
     });
   }
-  
 
   get homeLink(): string {
     return this.userRole === 'trainee' ? '/dashboard' : '/trainerside';

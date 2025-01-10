@@ -8,6 +8,9 @@ import { User } from '../models/user.model';
   providedIn: 'root',
 })
 export class AuthService {
+  getToken(): string | null {
+    return localStorage.getItem('authToken'); // Adjust based on your implementation
+  }
   private apiUrl = 'http://localhost:3000/api';
   private currentUserSubject: BehaviorSubject<User | null>;
   public currentUser: Observable<User | null>;
@@ -80,4 +83,32 @@ export class AuthService {
       headers: this.getAuthHeaders(),
     });
   }
+  getAcceptedTrainers() {
+    return this.http.get<{ id: number; name: string; email: string }[]>('/api/bookings/accepted-trainers', {
+        headers: { Authorization: `Bearer ${this.getToken()}` }
+    });
+}
+bookTrainer(trainerId: number): Observable<any> {
+  return this.http.post(`${this.apiUrl}/bookings`, { trainerId }, {
+    headers: this.getAuthHeaders()
+  });
+}
+
+
+updateBookingStatus(bookingId: number, status: string): Observable<any> {
+  return this.http.put(`${this.apiUrl}/bookings/${bookingId}/status`, { status }, {
+    headers: this.getAuthHeaders()
+  });
+}
+getTrainerBookings(): Observable<any> {
+  return this.http.get(`${this.apiUrl}/bookings`, {
+    headers: this.getAuthHeaders()
+  });
+}
+getBookings(): Observable<any> {
+  return this.http.get(`${this.apiUrl}/bookings`, {
+    headers: this.getAuthHeaders()
+  });
+}
+
 }

@@ -1,3 +1,4 @@
+<!-- Sidebar Navigation -->
 <div class="sidebar">
   <!-- Logo -->
   <div class="logo">
@@ -17,6 +18,24 @@
     <a class="nav-item" routerLink="/messages" routerLinkActive="active">
       <img src="assets/images/chat.png" alt="Messages Icon" class="nav-icon" />
       <span>Messages</span>
+    </a>
+
+    <!-- Bookings Link -->
+    <a 
+      *ngIf="userRole === 'trainee'" 
+      class="nav-item" 
+      routerLink="/bookings" 
+      routerLinkActive="active">
+      <img src="assets/images/open-book.png" alt="Bookings Icon" class="nav-icon" />
+      <span>Bookings</span>
+    </a>
+    <a 
+      *ngIf="userRole === 'trainer'" 
+      class="nav-item" 
+      routerLink="/trainersidebook" 
+      routerLinkActive="active">
+      <img src="assets/images/open-book.png" alt="Bookings Icon" class="nav-icon" />
+      <span>Bookings</span>
     </a>
   </nav>
 

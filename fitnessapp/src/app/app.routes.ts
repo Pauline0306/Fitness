@@ -9,15 +9,21 @@ import { FormsModule } from '@angular/forms';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { TrainersideComponent } from './trainerside/trainerside.component';
 import { MessagesComponent } from './messages/messages.component';
+import { AboutComponent } from './about/about.component';
+import { BookingsComponent } from './bookings/bookings.component';
+import { TrainersidebookComponent } from './trainersidebook/trainersidebook.component';
 
 export const routes: Routes = [
+    { path: 'home', component:HomeComponent},
     { path: 'admin', component: AdminComponent },
     { path: 'login', component: LoginComponent },
     { path: 'registration', component: RegisterComponent },
     { path: 'dashboard', component: DashboardComponent },
     { path: 'trainerside', component: TrainersideComponent },
-    { path: 'home', component:HomeComponent},
-    { path: 'messages', component: MessagesComponent}
+    { path: 'messages', component: MessagesComponent},
+    { path: 'about', component: AboutComponent},
+    { path: 'bookings', component:BookingsComponent},
+    { path: 'trainersidebook', component: TrainersidebookComponent}
 ];
 
 @NgModule({
