@@ -6,7 +6,7 @@
         <div *ngIf="acceptedTrainers.length > 0">
             <div class="trainer-box" *ngFor="let trainer of acceptedTrainers">
                 <h3>{{ trainer.opposite_name }}</h3>
-                <p>Trainer Role: {{ trainer.opposite_role }}</p>
+                <p>{{ trainer.opposite_role }}</p>
             </div>
         </div>
 
