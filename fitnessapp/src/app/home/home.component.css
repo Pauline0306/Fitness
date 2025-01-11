@@ -1,14 +1,14 @@
+
+
+
 .main-content {
-    display: flex;
-    justify-content:  center;
-    align-items: center;
-    flex-wrap: wrap;
-    padding: 0;
-    background-color: #f8f9fa;
-    height: calc(80vh - 60px);
-    position: relative;
-    top: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 120px 20px 50px; /* Add padding to account for fixed header */
+  gap: 50px;
     font-family: 'Montserrat', sans-serif;
+    margin-top: 100px;
   }
   
   .text-section {
@@ -60,3 +60,5 @@
     border-radius: 10px;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
   }
+
+  

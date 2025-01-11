@@ -61,6 +61,7 @@ connection.query('CREATE DATABASE IF NOT EXISTS training_db', (err) => {
             FOREIGN KEY (sender_id) REFERENCES users(id),
             FOREIGN KEY (receiver_id) REFERENCES users(id)
             )`;
+            
 
 connection.query(createMessagesTableQuery, (err) => {
     if (err) {
@@ -69,9 +70,289 @@ connection.query(createMessagesTableQuery, (err) => {
     }
     console.log('Messages table created or already exists');
 });
+const createBookingsTableQuery = `
+    CREATE TABLE IF NOT EXISTS bookings (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        trainee_id INT NOT NULL,
+        trainer_id INT NOT NULL,
+        status ENUM('pending', 'accepted', 'rejected') DEFAULT 'pending',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (trainee_id) REFERENCES users(id),
+        FOREIGN KEY (trainer_id) REFERENCES users(id)
+    )
+`;
+
+connection.query(createBookingsTableQuery, (err) => {
+    if (err) {
+        console.error('Error creating bookings table:', err);
+        return;
+    }
+    console.log('Bookings table created or already exists');
+});
+
 
     });
 });
+
+app.post('/api/bookings', (req, res) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) {
+      return res.status(401).json({ message: 'Unauthorized' });
+  }
+
+  try {
+      const decoded = jwt.verify(token, 'your_jwt_secret');
+      const { trainerId } = req.body;
+
+      if (!trainerId) {
+          return res.status(400).json({ message: 'Trainer ID is required' });
+      }
+
+      // Only trainees can book a trainer
+      if (decoded.role !== 'trainee') {
+          return res.status(403).json({ message: 'Access denied. Trainees only.' });
+      }
+
+      // Check if trainer exists and is actually a trainer
+      connection.query(
+          'SELECT id, role FROM users WHERE id = ?',
+          [trainerId],
+          (err, results) => {
+              if (err) {
+                  console.error('Error checking trainer:', err);
+                  return res.status(500).json({ message: 'Error checking trainer' });
+              }
+
+              if (results.length === 0) {
+                  return res.status(404).json({ message: 'Trainer not found' });
+              }
+
+              if (results[0].role !== 'trainer') {
+                  return res.status(400).json({ message: 'Selected user is not a trainer' });
+              }
+
+              // Check for existing pending or accepted booking
+              connection.query(
+                  'SELECT id, status FROM bookings WHERE trainee_id = ? AND trainer_id = ? AND (status = "pending" OR status = "accepted")',
+                  [decoded.userId, trainerId],
+                  (err, bookings) => {
+                      if (err) {
+                          console.error('Error checking existing bookings:', err);
+                          return res.status(500).json({ message: 'Error checking existing bookings' });
+                      }
+
+                      if (bookings.length > 0) {
+                          return res.status(400).json({ 
+                              message: `You already have a ${bookings[0].status} booking with this trainer` 
+                          });
+                      }
+
+                      // Create new booking
+                      const query = `
+                          INSERT INTO bookings (trainee_id, trainer_id, status)
+                          VALUES (?, ?, 'pending')
+                      `;
+
+                      connection.query(query, [decoded.userId, trainerId], (err, results) => {
+                          if (err) {
+                              console.error('Error creating booking:', err);
+                              return res.status(500).json({ message: 'Error creating booking' });
+                          }
+                          res.status(201).json({ 
+                              message: 'Booking request sent successfully',
+                              bookingId: results.insertId
+                          });
+                      });
+                  }
+              );
+          }
+      );
+  } catch (err) {
+      console.error('Token verification failed:', err);
+      return res.status(401).json({ message: 'Invalid token' });
+  }
+});
+
+// Get bookings for a user
+app.get('/api/bookings', (req, res) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) {
+      return res.status(401).json({ message: 'Unauthorized' });
+  }
+
+  try {
+      const decoded = jwt.verify(token, 'your_jwt_secret');
+
+      const query = `
+          SELECT 
+              b.id,
+              u.name AS opposite_name,
+              u.role AS opposite_role,
+              b.status,
+              b.created_at
+          FROM bookings b
+          JOIN users u ON (b.trainee_id = ? AND b.trainer_id = u.id)
+                      OR (b.trainer_id = ? AND b.trainee_id = u.id)
+      `;
+
+      connection.query(query, [decoded.userId, decoded.userId], (err, results) => {
+          if (err) {
+              console.error('Error fetching bookings:', err);
+              return res.status(500).json({ message: 'Error fetching bookings' });
+          }
+          res.json(results);
+      });
+  } catch (err) {
+      console.error('Token verification failed:', err);
+      return res.status(401).json({ message: 'Invalid token' });
+  }
+});
+
+// Update booking status
+app.put('/api/bookings/:bookingId/status', (req, res) => {
+  console.log('Request URL params:', req.params); // Debug log
+  console.log('Request body:', req.body); // Debug log
+
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, 'your_jwt_secret');
+
+    const bookingId = req.params.bookingId;
+    const { status } = req.body;
+
+    if (!bookingId || bookingId === 'undefined') {
+      return res.status(400).json({
+        message: 'Invalid booking ID',
+        receivedId: bookingId,
+      });
+    }
+
+    if (!status || !['accepted', 'rejected'].includes(status)) {
+      return res.status(400).json({
+        message: 'Invalid status. Must be accepted or rejected.',
+        receivedStatus: status,
+      });
+    }
+
+    if (decoded.role !== 'trainer') {
+      return res.status(403).json({
+        message: 'Access denied. Trainers only.',
+        userRole: decoded.role,
+      });
+    }
+
+    // Query to get booking details
+    const checkBookingQuery = `
+      SELECT b.*, 
+             trainee.name AS trainee_name, 
+             trainer.name AS trainer_name
+      FROM bookings b
+      JOIN users trainee ON b.trainee_id = trainee.id
+      JOIN users trainer ON b.trainer_id = trainer.id
+      WHERE b.id = ?
+    `;
+
+    connection.query(checkBookingQuery, [bookingId], (err, bookings) => {
+      if (err) {
+        console.error('Database error:', err);
+        return res.status(500).json({
+          message: 'Database error while checking booking',
+          error: err.message,
+        });
+      }
+
+      if (bookings.length === 0) {
+        return res.status(404).json({
+          message: 'Booking not found',
+          searchedId: bookingId,
+        });
+      }
+
+      const booking = bookings[0];
+
+      if (booking.trainer_id !== decoded.userId) {
+        return res.status(403).json({
+          message: 'Not authorized to update this booking',
+          bookingTrainerId: booking.trainer_id,
+          requestingTrainerId: decoded.userId,
+        });
+      }
+
+      // Update the booking status
+      const updateQuery = 'UPDATE bookings SET status = ? WHERE id = ?';
+      connection.query(updateQuery, [status, bookingId], (updateErr, updateResult) => {
+        if (updateErr) {
+          console.error('Update error:', updateErr);
+          return res.status(500).json({
+            message: 'Failed to update booking status',
+            error: updateErr.message,
+          });
+        }
+
+        if (updateResult.affectedRows === 0) {
+          return res.status(404).json({
+            message: 'Booking could not be updated',
+            updateResult,
+          });
+        }
+
+        // Respond with updated booking details
+        res.status(200).json({
+          message: `Booking ${status} successfully`,
+          booking: {
+            id: bookingId,
+            status: status,
+            trainee_name: booking.trainee_name, // Include trainee name
+            trainer_name: booking.trainer_name, // Include trainer name
+            updated_at: new Date(),
+          },
+        });
+      });
+    });
+  } catch (err) {
+    console.error('Request processing error:', err);
+    return res.status(401).json({
+      message: 'Invalid token or processing error',
+      error: err.message,
+    });
+  }
+});
+
+
+app.get('/api/bookings/accepted-trainers', (req, res) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) return res.status(401).json({ message: 'Unauthorized' });
+
+  try {
+      const decoded = jwt.verify(token, 'your_jwt_secret');
+      if (decoded.role !== 'trainee') return res.status(403).json({ message: 'Only trainees can view accepted trainers.' });
+
+      connection.query(
+          `
+          SELECT u.id, u.name, u.email 
+          FROM bookings b
+          JOIN users u ON b.trainer_id = u.id
+          WHERE b.trainee_id = ? AND b.status = 'accepted'
+          `,
+          [decoded.userId],
+          (err, results) => {
+              if (err) {
+                  console.error('Error fetching accepted trainers:', err);
+                  return res.status(500).json({ message: 'Error fetching accepted trainers.' });
+              }
+              res.json(results);
+          }
+      );
+  } catch (err) {
+      console.error('Token verification failed:', err);
+      res.status(401).json({ message: 'Invalid token' });
+  }
+});
+
 
 // Register endpoint
 app.post('/api/auth/register', async (req, res) => {

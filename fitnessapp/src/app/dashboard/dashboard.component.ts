@@ -4,6 +4,9 @@ import { AuthService } from '../services/auth.service';
 import { CommonModule } from '@angular/common';
 import { SidebarComponent } from "../sidebar/sidebar.component";
 import { FormsModule } from '@angular/forms';
+import Swal from 'sweetalert2';
+import { HttpClient } from '@angular/common/http';
+
 
 
 @Component({
@@ -38,6 +41,35 @@ export class DashboardComponent {
         },
       });
     }
+  }
+  bookTrainer(trainerId: number, trainerName: string) {
+    Swal.fire({
+      title: `Book ${trainerName}?`,
+      text: 'Are you sure you want to book this trainer?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, book!'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.authService.bookTrainer(trainerId).subscribe({
+          next: (response) => {
+            Swal.fire({
+              title: 'Success!',
+              text: 'Trainer has been booked.',
+              icon: 'success'
+            }).then(() => {
+              this.router.navigate(['/bookings']);
+            });
+          },
+          error: (err) => {
+            Swal.fire('Error', err.error?.message || 'Failed to book trainer.', 'error');
+            console.error('Booking error:', err);
+          }
+        });
+      }
+    });
   }
 
   logout() {
