@@ -3,6 +3,7 @@ import { AuthService } from '../services/auth.service';
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import Swal from 'sweetalert2';
+import { fadeAnimation, slideAnimation } from '../animations';
 
 @Component({
   selector: 'app-sidebar',
@@ -10,6 +11,8 @@ import Swal from 'sweetalert2';
   styleUrls: ['./sidebar.component.css'],
   standalone: true,
   imports: [RouterModule, CommonModule],
+  animations: [fadeAnimation, slideAnimation]
+  
 })
 export class SidebarComponent implements OnInit {
   userName: string | null = '';

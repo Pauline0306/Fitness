@@ -4,6 +4,8 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import Swal from 'sweetalert2';
+import { fadeAnimation, slideAnimation } from '../animations';
+
 
 
 @Component({
@@ -11,7 +13,8 @@ import Swal from 'sweetalert2';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterModule],
   templateUrl: './registration.component.html',
-  styleUrl: './registration.component.css'
+  styleUrl: './registration.component.css',
+  animations: [fadeAnimation, slideAnimation]
 })
 export class RegisterComponent {
   registerForm: FormGroup;

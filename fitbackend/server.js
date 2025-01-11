@@ -434,6 +434,33 @@ app.post('/api/auth/login', async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
+app.get('/api/workout_routines/:userId', (req, res) => {
+  const userId = req.params.userId;
+  const query = 'SELECT * FROM workout_routines WHERE user_id = ?';
+  db.query(query, [userId], (err, results) => {
+    if (err) {
+      console.error('Error fetching workout routines:', err);
+      res.status(500).json({ error: 'Failed to fetch workout routines' });
+    } else {
+      res.json(results);
+    }
+  });
+});
+
+
+app.get('/api/diet_entries/:userId', (req, res) => {
+  const userId = req.params.userId;
+  const query = 'SELECT * FROM diet_entries WHERE user_id = ?';
+  db.query(query, [userId], (err, results) => {
+    if (err) {
+      console.error('Error fetching diet entries:', err);
+      res.status(500).json({ error: 'Failed to fetch diet entries' });
+    } else {
+      res.json(results);
+    }
+  });
+});
+
 
 // Get all users (with role-based access)
 

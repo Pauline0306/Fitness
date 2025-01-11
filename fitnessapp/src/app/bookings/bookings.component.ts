@@ -32,21 +32,25 @@ export class BookingsComponent implements OnInit {
   loadBookings(): void {
     this.authService.getBookings().subscribe({
       next: (response) => {
-        // Assign and sort bookings
-        this.bookings = response.sort((a: Booking, b: Booking) => {
-          if (a.status === 'accepted' && b.status !== 'accepted') return -1;
-          if (b.status === 'accepted' && a.status !== 'accepted') return 1;
-          return 0;
-        });
-  
-        // Filter accepted trainers
-        this.acceptedTrainers = this.bookings.filter((booking: Booking) => booking.status === 'accepted');
-        console.log('Accepted Trainers:', this.acceptedTrainers);
+        this.processBookings(response);
       },
       error: (error) => {
         console.error('Error loading bookings:', error);
       }
     });
   }
-  
+
+  /**
+   * Processes the bookings to separate accepted trainers from pending/rejected bookings.
+   */
+  private processBookings(bookings: Booking[]): void {
+    // Filter accepted trainers and store them in a separate list
+    this.acceptedTrainers = bookings.filter((booking) => booking.status === 'accepted');
+
+    // Keep only bookings that are pending or rejected
+    this.bookings = bookings.filter((booking) => booking.status !== 'accepted');
+
+    console.log('Processed Bookings:', this.bookings);
+    console.log('Accepted Trainers:', this.acceptedTrainers);
+  }
 }

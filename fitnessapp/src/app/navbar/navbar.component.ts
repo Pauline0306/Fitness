@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { fadeAnimation, slideAnimation } from '../animations';
 
 @Component({
   selector: 'app-navbar',
@@ -9,6 +10,7 @@ import { RouterModule } from '@angular/router';
   styleUrls: ['./navbar.component.css'],
   standalone: true,
   imports: [CommonModule,RouterModule],
+  animations: [fadeAnimation, slideAnimation]
 })
 export class NavbarComponent implements OnInit {
   showNavbar = false;

@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import Swal from 'sweetalert2';
+import { fadeAnimation, slideAnimation } from '../animations';
 
 @Component({
   selector: 'app-login',
@@ -11,6 +12,7 @@ import Swal from 'sweetalert2';
   imports: [CommonModule, ReactiveFormsModule, RouterModule],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css'],
+  animations: [fadeAnimation, slideAnimation]
 })
 export class LoginComponent {
   loginForm: FormGroup;

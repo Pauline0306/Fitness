@@ -3,6 +3,7 @@ import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { SidebarComponent } from './sidebar/sidebar.component';
 import { CommonModule } from '@angular/common';
 import { NavbarComponent } from "./navbar/navbar.component";
+import { fadeAnimation, slideAnimation } from './animations';
 
 @Component({
   selector: 'app-root',
@@ -10,12 +11,11 @@ import { NavbarComponent } from "./navbar/navbar.component";
   imports: [RouterOutlet, CommonModule, SidebarComponent, NavbarComponent],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
+  animations: [fadeAnimation, slideAnimation]
 })
 export class AppComponent implements OnInit {
-  title(title: any) {
-    throw new Error('Method not implemented.');
-  }
   showSidebar = false;
+  navigationCounter = 0;
 
   constructor(private router: Router) {}
 
@@ -23,7 +23,13 @@ export class AppComponent implements OnInit {
     this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
         this.showSidebar = ['/messages', '/dashboard', '/trainerside', '/bookings', 'trainersidebook'].includes(event.url);
+        this.navigationCounter++;
       }
     });
+  }
+
+  // Add this method to handle route animation states
+  prepareRoute(outlet: RouterOutlet) {
+    return outlet && outlet.activatedRouteData && this.navigationCounter;
   }
 }

@@ -133,5 +133,15 @@ getBookings(): Observable<any> {
     headers: this.getAuthHeaders()
   });
 }
+getWorkoutRoutines(userId: number) {
+  return this.http.get(`/api/workout_routines/${userId}`);
+}
+
+
+getDietEntries(userId: number) {
+  return this.http.get(`/api/diet_entries/${userId}`);
+}
+
+
 
 }

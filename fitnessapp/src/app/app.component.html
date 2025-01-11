@@ -1,7 +1,5 @@
 <app-navbar></app-navbar>
-<div class="app-layout">
-  <app-sidebar *ngIf="showSidebar"></app-sidebar>
-  <main [class.sidebar-visible]="showSidebar">
-    <router-outlet></router-outlet>
-  </main>
-</div>
+<app-sidebar *ngIf="showSidebar"></app-sidebar>
+<main [@fadeAnimation]="prepareRoute(outlet)" [@slideAnimation]="prepareRoute(outlet)">
+  <router-outlet #outlet="outlet"></router-outlet>
+</main>
