@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MessagingService } from '../services/messaging.service';
 import { AuthService } from '../services/auth.service';
@@ -14,6 +14,7 @@ import { CommonModule } from '@angular/common';
   imports: [SidebarComponent, FormsModule, CommonModule],
 })
 export class MessagesComponent implements OnInit {
+  @ViewChild('messagesContainer', { static: false }) messagesContainer!: ElementRef;
   users: User[] = [];
   conversations: any[] = []; // List of conversations
   messages: any[] = [];
@@ -91,6 +92,9 @@ export class MessagesComponent implements OnInit {
     if (this.selectedUser?.id) {
       this.messagingService.getConversation(this.selectedUser.id).subscribe((messages) => {
         this.messages = messages;
+        // Scroll to the latest message after messages are loaded
+        setTimeout(() => this.scrollToBottom(), 0);
+
         // Mark unread messages as read
         messages.forEach((message) => {
           if (!message.is_read && message.receiver_id === this.currentUser?.id) {
@@ -100,13 +104,20 @@ export class MessagesComponent implements OnInit {
       });
     }
   }
-
   sendMessage() {
     if (this.newMessage.trim() && this.selectedUser?.id) {
-      this.messagingService.sendMessage(this.selectedUser.id, this.newMessage.trim()).subscribe(() => {
-        this.loadMessages();
-        this.newMessage = '';
-      });
+      this.messagingService
+        .sendMessage(this.selectedUser.id, this.newMessage.trim())
+        .subscribe(() => {
+          this.loadMessages();
+          this.newMessage = '';
+          setTimeout(() => this.scrollToBottom(), 0); // Ensure scroll happens after new message is sent
+        });
+    }
+  }
+  scrollToBottom() {
+    if (this.messagesContainer) {
+      this.messagesContainer.nativeElement.scrollTop = this.messagesContainer.nativeElement.scrollHeight;
     }
   }
 }
