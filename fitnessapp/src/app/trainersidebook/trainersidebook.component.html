@@ -49,7 +49,18 @@
             {{ trainee.showDiet ? 'Hide Diet' : 'View Diet' }}
           </button>
         </div>
-
+    
+        <!-- Suggestion Input Section -->
+        <div class="suggestion-section">
+          <textarea
+            [(ngModel)]="trainee.suggestionText"
+            placeholder="Write a suggestion..."
+          ></textarea>
+          <button (click)="postSuggestion(trainee.id, trainee.suggestionText)">
+            Post Suggestion
+          </button>
+        </div>
+    
         <!-- Workout Routines Table -->
         <div *ngIf="trainee.showWorkout && trainee.workouts" class="dropdown-content">
           <h4>Workout Routines</h4>
@@ -73,7 +84,7 @@
             <p>No workout routines found.</p>
           </div>
         </div>
-
+    
         <!-- Diet Entries Table -->
         <div *ngIf="trainee.showDiet && trainee.dietEntries" class="dropdown-content">
           <h4>Diet Entries</h4>
@@ -103,8 +114,4 @@
         </div>
       </div>
     </div>
-  </div>
-  <div *ngIf="trainees.length === 0">
-    <p>You don't have any trainees yet.</p>
-  </div>
-</div>
+    

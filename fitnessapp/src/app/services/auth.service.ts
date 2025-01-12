@@ -166,6 +166,17 @@ getDietEntries(userId: number): Observable<any> {
     })
   );
 }
+postSuggestion(suggestionPayload: { user_id: number; suggestion: string }): Observable<any> {
+  return this.http.post(`${this.apiUrl}/suggestions`, suggestionPayload, {
+    headers: this.getAuthHeaders()
+  }).pipe(
+    catchError((error: HttpErrorResponse) => {
+      console.error('Error posting suggestion:', error);
+      return throwError(() => new Error(error.error?.message || 'Failed to post suggestion'));
+    })
+  );
+}
+
 
 
 }

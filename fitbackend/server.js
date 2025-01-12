@@ -94,6 +94,25 @@ connection.query(createBookingsTableQuery, (err) => {
     console.log('Bookings table created or already exists');
 });
 
+const createSuggestionsTableQuery = `
+    CREATE TABLE IF NOT EXISTS suggestions (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        suggestion TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+`;
+
+connection.query(createSuggestionsTableQuery, (err) => {
+    if (err) {
+        console.error('Error creating suggestions table:', err);
+        return;
+    }
+    console.log('Suggestions table created or already exists');
+});
+
+
 
     });
 });
@@ -219,6 +238,40 @@ app.get('/api/bookings', (req, res) => {
       return res.status(401).json({ message: 'Invalid token' });
   }
 });
+
+app.post('/api/suggestions', (req, res) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, 'your_jwt_secret');
+    const { user_id, suggestion } = req.body;
+
+    if (!user_id || !suggestion) {
+      return res.status(400).json({ message: 'user_id and suggestion are required' });
+    }
+
+    // Verify that the requesting user is a trainer
+    if (decoded.role !== 'trainer') {
+      return res.status(403).json({ message: 'Only trainers can post suggestions' });
+    }
+
+    const query = 'INSERT INTO suggestions (user_id, suggestion) VALUES (?, ?)';
+    connection.query(query, [user_id, suggestion], (err, result) => {
+      if (err) {
+        console.error('Error inserting suggestion:', err);
+        return res.status(500).json({ message: 'Failed to insert suggestion' });
+      }
+      res.status(201).json({ message: 'Suggestion added successfully' });
+    });
+  } catch (err) {
+    console.error('Token verification failed:', err);
+    return res.status(401).json({ message: 'Invalid token' });
+  }
+});
+
 
 // Update booking status
 app.put('/api/bookings/:bookingId/status', (req, res) => {

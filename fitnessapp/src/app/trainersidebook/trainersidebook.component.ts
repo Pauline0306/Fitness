@@ -4,10 +4,11 @@ import { AuthService } from '../services/auth.service';
 import { Router } from '@angular/router';
 import { SidebarComponent } from '../sidebar/sidebar.component';
 import Swal from 'sweetalert2';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-trainersidebook',
-  imports: [CommonModule, SidebarComponent],
+  imports: [CommonModule, SidebarComponent,FormsModule],
   templateUrl: './trainersidebook.component.html',
   styleUrl: './trainersidebook.component.css',
 })
@@ -140,6 +141,40 @@ export class TrainersidebookComponent {
       },
     });
   }
+  postSuggestion(traineeId: number, suggestionText: string) {
+    if (!suggestionText || suggestionText.trim() === '') {
+      Swal.fire('Warning', 'Suggestion cannot be empty.', 'warning');
+      return;
+    }
+  
+    const suggestionPayload = {
+      user_id: traineeId,
+      suggestion: suggestionText.trim()
+    };
+  
+    this.authService.postSuggestion(suggestionPayload).subscribe({
+      next: (response) => {
+        Swal.fire('Success!', 'Suggestion posted successfully.', 'success');
+        // Clear the suggestion text for the trainee
+        const trainee = this.trainees.find((t) => t.id === traineeId);
+        if (trainee) {
+          trainee.suggestionText = '';
+        }
+      },
+      error: (error) => {
+        console.error('Error posting suggestion:', error);
+        let errorMessage = 'Failed to post suggestion. Please try again.';
+        
+        // Handle specific error messages from the backend
+        if (error.error?.message) {
+          errorMessage = error.error.message;
+        }
+        
+        Swal.fire('Error', errorMessage, 'error');
+      }
+    });
+  }
+  
 
   ngOnInit() {
     this.loadBookings();
