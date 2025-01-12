@@ -133,15 +133,28 @@ getBookings(): Observable<any> {
     headers: this.getAuthHeaders()
   });
 }
-getWorkoutRoutines(userId: number) {
-  return this.http.get(`/api/workout_routines/${userId}`);
+getWorkoutRoutines(userId: number): Observable<any> {
+  return this.http.get(`${this.apiUrl}/workout_routines/${userId}`, {
+    headers: this.getAuthHeaders()
+  }).pipe(
+    catchError((error: HttpErrorResponse) => {
+      console.error('Error fetching workout routines:', error);
+      return throwError(() => new Error(error.error?.message || 'Failed to fetch workout routines'));
+    })
+  );
 }
 
 
-getDietEntries(userId: number) {
-  return this.http.get(`/api/diet_entries/${userId}`);
+getDietEntries(userId: number): Observable<any> {
+  return this.http.get(`${this.apiUrl}/diet_entries/${userId}`, {
+    headers: this.getAuthHeaders()
+  }).pipe(
+    catchError((error: HttpErrorResponse) => {
+      console.error('Error fetching diet entries:', error);
+      return throwError(() => new Error(error.error?.message || 'Failed to fetch diet entries'));
+    })
+  );
 }
-
 
 
 }

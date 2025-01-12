@@ -436,29 +436,88 @@ app.post('/api/auth/login', async (req, res) => {
 });
 app.get('/api/workout_routines/:userId', (req, res) => {
   const userId = req.params.userId;
-  const query = 'SELECT * FROM workout_routines WHERE user_id = ?';
-  db.query(query, [userId], (err, results) => {
-    if (err) {
-      console.error('Error fetching workout routines:', err);
-      res.status(500).json({ error: 'Failed to fetch workout routines' });
-    } else {
-      res.json(results);
+  const token = req.headers.authorization?.split(' ')[1];
+  
+  if (!token) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, 'your_jwt_secret');
+    
+    // Verify if the requester is a trainer
+    if (decoded.role !== 'trainer') {
+      return res.status(403).json({ message: 'Access denied. Trainers only.' });
     }
-  });
+
+    // Fetch workout routines
+    const query = `
+      SELECT id, user_id, body_part, exercises 
+      FROM workout_routines 
+      WHERE user_id = ?
+      ORDER BY id DESC
+    `;
+    
+    connection.query(query, [userId], (err, results) => {
+      if (err) {
+        console.error('Error fetching workout routines:', err);
+        return res.status(500).json({ message: 'Error fetching workout routines' });
+      }
+
+      // Parse the exercises text field to JSON if it's stored as a string
+      const formattedResults = results.map(routine => ({
+        ...routine,
+        exercises: typeof routine.exercises === 'string' 
+          ? JSON.parse(routine.exercises) 
+          : routine.exercises
+      }));
+
+      res.json(formattedResults);
+    });
+
+  } catch (err) {
+    console.error('Token verification failed:', err);
+    return res.status(401).json({ message: 'Invalid token' });
+  }
 });
 
 
 app.get('/api/diet_entries/:userId', (req, res) => {
   const userId = req.params.userId;
-  const query = 'SELECT * FROM diet_entries WHERE user_id = ?';
-  db.query(query, [userId], (err, results) => {
-    if (err) {
-      console.error('Error fetching diet entries:', err);
-      res.status(500).json({ error: 'Failed to fetch diet entries' });
-    } else {
-      res.json(results);
+  const token = req.headers.authorization?.split(' ')[1];
+  
+  if (!token) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, 'your_jwt_secret');
+    
+    // Verify if the requester is a trainer
+    if (decoded.role !== 'trainer') {
+      return res.status(403).json({ message: 'Access denied. Trainers only.' });
     }
-  });
+
+    // Fetch diet entries
+    const query = `
+      SELECT id, user_id, meal, food_name, calories, created_at 
+      FROM diet_entries 
+      WHERE user_id = ?
+      ORDER BY created_at DESC
+    `;
+    
+    connection.query(query, [userId], (err, results) => {
+      if (err) {
+        console.error('Error fetching diet entries:', err);
+        return res.status(500).json({ message: 'Error fetching diet entries' });
+      }
+      res.json(results);
+    });
+
+  } catch (err) {
+    console.error('Token verification failed:', err);
+    return res.status(401).json({ message: 'Invalid token' });
+  }
 });
 
 
