@@ -78,7 +78,7 @@
 .profile {
   text-align: center;
   margin-bottom: 50px; /* Adjusted from 80px */
-  margin-top: -20px;   /* New negative margin for upward movement */
+  margin-top: -70px;   /* New negative margin for upward movement */
 }
 
 .profile p {
