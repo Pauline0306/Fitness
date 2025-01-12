@@ -42,56 +42,69 @@
         <h3><strong>{{ trainee.opposite_name }}</strong></h3>
         <p>{{ trainee.opposite_role }}</p>
         <div class="trainee-actions">
-          <button (click)="toggleWorkout(trainee.id)">View Workouts</button>
-          <button (click)="toggleDiet(trainee.id)">View Diet</button>
-
+          <button (click)="toggleWorkout(trainee.id)">
+            {{ trainee.showWorkout ? 'Hide Workouts' : 'View Workouts' }}
+          </button>
+          <button (click)="toggleDiet(trainee.id)">
+            {{ trainee.showDiet ? 'Hide Diet' : 'View Diet' }}
+          </button>
         </div>
 
         <!-- Workout Routines Table -->
-        <div *ngIf="trainee.showWorkout" class="dropdown-content">
+        <div *ngIf="trainee.showWorkout && trainee.workouts" class="dropdown-content">
           <h4>Workout Routines</h4>
-          <table>
-            <thead>
-              <tr>
-                <th>Body Part</th>
-                <th>Exercises</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let workout of trainee.workouts">
-                <td>{{ workout.body_part }}</td>
-                <td>{{ workout.exercises }}</td>
-              </tr>
-            </tbody>
-          </table>
+          <div *ngIf="trainee.workouts.length > 0">
+            <table>
+              <thead>
+                <tr>
+                  <th>Body Part</th>
+                  <th>Exercises</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let workout of trainee.workouts">
+                  <td>{{ workout.body_part }}</td>
+                  <td>{{ workout.exercises }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div *ngIf="trainee.workouts.length === 0">
+            <p>No workout routines found.</p>
+          </div>
         </div>
 
         <!-- Diet Entries Table -->
-        <div *ngIf="trainee.showDiet" class="dropdown-content">
+        <div *ngIf="trainee.showDiet && trainee.dietEntries" class="dropdown-content">
           <h4>Diet Entries</h4>
-          <table>
-            <thead>
-              <tr>
-                <th>Meal</th>
-                <th>Food</th>
-                <th>Calories</th>
-                <th>Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let diet of trainee.dietEntries">
-                <td>{{ diet.meal }}</td>
-                <td>{{ diet.food_name }}</td>
-                <td>{{ diet.calories }}</td>
-                <td>{{ diet.created_at | date: 'medium' }}</td>
-              </tr>
-            </tbody>
-          </table>
+          <div *ngIf="trainee.dietEntries.length > 0">
+            <table>
+              <thead>
+                <tr>
+                  <th>Meal</th>
+                  <th>Food</th>
+                  <th>Calories</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let diet of trainee.dietEntries">
+                  <td>{{ diet.meal }}</td>
+                  <td>{{ diet.food_name }}</td>
+                  <td>{{ diet.calories }}</td>
+                  <td>{{ diet.created_at | date: 'medium' }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div *ngIf="trainee.dietEntries.length === 0">
+            <p>No diet entries found.</p>
+          </div>
         </div>
       </div>
     </div>
   </div>
   <div *ngIf="trainees.length === 0">
-    <p>You don't have any trainers yet.</p>
+    <p>You don't have any trainees yet.</p>
   </div>
 </div>

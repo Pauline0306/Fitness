@@ -17,6 +17,11 @@ export class AuthService {
   private apiUrl = 'http://localhost:3000/api';
   private currentUserSubject: BehaviorSubject<User | null>;
   public currentUser: Observable<User | null>;
+  private workoutUpdatesSubject = new BehaviorSubject<any[]>([]);
+  private dietUpdatesSubject = new BehaviorSubject<any[]>([]);
+
+  workoutUpdates$ = this.workoutUpdatesSubject.asObservable();
+  dietUpdates$ = this.dietUpdatesSubject.asObservable();
 
   constructor(private http: HttpClient) {
     this.currentUserSubject = new BehaviorSubject<User | null>(
@@ -135,7 +140,7 @@ getBookings(): Observable<any> {
 }
 getWorkoutRoutines(userId: number): Observable<any> {
   return this.http.get(`${this.apiUrl}/workout_routines/${userId}`, {
-    headers: this.getAuthHeaders()
+    headers: this.getAuthHeaders(),
   }).pipe(
     catchError((error: HttpErrorResponse) => {
       console.error('Error fetching workout routines:', error);
@@ -146,12 +151,18 @@ getWorkoutRoutines(userId: number): Observable<any> {
 
 
 getDietEntries(userId: number): Observable<any> {
+  // Constructing the API URL with the provided userId
   return this.http.get(`${this.apiUrl}/diet_entries/${userId}`, {
-    headers: this.getAuthHeaders()
+    headers: this.getAuthHeaders() // Including the Authorization header
   }).pipe(
     catchError((error: HttpErrorResponse) => {
+      // Logging the error to help with debugging
       console.error('Error fetching diet entries:', error);
-      return throwError(() => new Error(error.error?.message || 'Failed to fetch diet entries'));
+
+      // Returning a descriptive error for the subscriber
+      return throwError(() =>
+        new Error(error.error?.message || 'Failed to fetch diet entries')
+      );
     })
   );
 }

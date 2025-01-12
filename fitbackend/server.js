@@ -73,14 +73,18 @@ connection.query(createMessagesTableQuery, (err) => {
 const createBookingsTableQuery = `
     CREATE TABLE IF NOT EXISTS bookings (
         id INT AUTO_INCREMENT PRIMARY KEY,
-        trainee_id INT NOT NULL,
+        user_id INT NOT NULL,
         trainer_id INT NOT NULL,
-        status ENUM('pending', 'accepted', 'rejected') DEFAULT 'pending',
+        status ENUM('pending', 'accepted', 'rejected') NOT NULL DEFAULT 'pending',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (trainee_id) REFERENCES users(id),
-        FOREIGN KEY (trainer_id) REFERENCES users(id)
+        KEY user_id_idx (user_id),
+        KEY trainer_id_idx (trainer_id),
+        CONSTRAINT bookings_user_fk FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+        CONSTRAINT bookings_trainer_fk FOREIGN KEY (trainer_id) REFERENCES users(id) ON DELETE CASCADE
     )
 `;
+
+
 
 connection.query(createBookingsTableQuery, (err) => {
     if (err) {
@@ -108,7 +112,6 @@ app.post('/api/bookings', (req, res) => {
           return res.status(400).json({ message: 'Trainer ID is required' });
       }
 
-      // Only trainees can book a trainer
       if (decoded.role !== 'trainee') {
           return res.status(403).json({ message: 'Access denied. Trainees only.' });
       }
@@ -133,7 +136,7 @@ app.post('/api/bookings', (req, res) => {
 
               // Check for existing pending or accepted booking
               connection.query(
-                  'SELECT id, status FROM bookings WHERE trainee_id = ? AND trainer_id = ? AND (status = "pending" OR status = "accepted")',
+                  'SELECT id, status FROM bookings WHERE user_id = ? AND trainer_id = ? AND (status = "pending" OR status = "accepted")',
                   [decoded.userId, trainerId],
                   (err, bookings) => {
                       if (err) {
@@ -142,14 +145,14 @@ app.post('/api/bookings', (req, res) => {
                       }
 
                       if (bookings.length > 0) {
-                          return res.status(400).json({ 
-                              message: `You already have a ${bookings[0].status} booking with this trainer` 
+                          return res.status(400).json({
+                              message: `You already have a ${bookings[0].status} booking with this trainer`
                           });
                       }
 
                       // Create new booking
                       const query = `
-                          INSERT INTO bookings (trainee_id, trainer_id, status)
+                          INSERT INTO bookings (user_id, trainer_id, status)
                           VALUES (?, ?, 'pending')
                       `;
 
@@ -158,7 +161,7 @@ app.post('/api/bookings', (req, res) => {
                               console.error('Error creating booking:', err);
                               return res.status(500).json({ message: 'Error creating booking' });
                           }
-                          res.status(201).json({ 
+                          res.status(201).json({
                               message: 'Booking request sent successfully',
                               bookingId: results.insertId
                           });
@@ -191,17 +194,26 @@ app.get('/api/bookings', (req, res) => {
               b.status,
               b.created_at
           FROM bookings b
-          JOIN users u ON (b.trainee_id = ? AND b.trainer_id = u.id)
-                      OR (b.trainer_id = ? AND b.trainee_id = u.id)
+          JOIN users u ON (
+              CASE 
+                  WHEN b.user_id = ? THEN b.trainer_id = u.id
+                  WHEN b.trainer_id = ? THEN b.user_id = u.id
+              END
+          )
+          WHERE b.user_id = ? OR b.trainer_id = ?
       `;
 
-      connection.query(query, [decoded.userId, decoded.userId], (err, results) => {
-          if (err) {
-              console.error('Error fetching bookings:', err);
-              return res.status(500).json({ message: 'Error fetching bookings' });
+      connection.query(
+          query, 
+          [decoded.userId, decoded.userId, decoded.userId, decoded.userId], 
+          (err, results) => {
+              if (err) {
+                  console.error('Error fetching bookings:', err);
+                  return res.status(500).json({ message: 'Error fetching bookings' });
+              }
+              res.json(results);
           }
-          res.json(results);
-      });
+      );
   } catch (err) {
       console.error('Token verification failed:', err);
       return res.status(401).json({ message: 'Invalid token' });
@@ -210,115 +222,66 @@ app.get('/api/bookings', (req, res) => {
 
 // Update booking status
 app.put('/api/bookings/:bookingId/status', (req, res) => {
-  console.log('Request URL params:', req.params); // Debug log
-  console.log('Request body:', req.body); // Debug log
-
   const token = req.headers.authorization?.split(' ')[1];
   if (!token) {
-    return res.status(401).json({ message: 'Unauthorized' });
+      return res.status(401).json({ message: 'Unauthorized' });
   }
 
   try {
-    const decoded = jwt.verify(token, 'your_jwt_secret');
+      const decoded = jwt.verify(token, 'your_jwt_secret');
+      const bookingId = req.params.bookingId;
+      const { status } = req.body;
 
-    const bookingId = req.params.bookingId;
-    const { status } = req.body;
-
-    if (!bookingId || bookingId === 'undefined') {
-      return res.status(400).json({
-        message: 'Invalid booking ID',
-        receivedId: bookingId,
-      });
-    }
-
-    if (!status || !['accepted', 'rejected'].includes(status)) {
-      return res.status(400).json({
-        message: 'Invalid status. Must be accepted or rejected.',
-        receivedStatus: status,
-      });
-    }
-
-    if (decoded.role !== 'trainer') {
-      return res.status(403).json({
-        message: 'Access denied. Trainers only.',
-        userRole: decoded.role,
-      });
-    }
-
-    // Query to get booking details
-    const checkBookingQuery = `
-      SELECT b.*, 
-             trainee.name AS trainee_name, 
-             trainer.name AS trainer_name
-      FROM bookings b
-      JOIN users trainee ON b.trainee_id = trainee.id
-      JOIN users trainer ON b.trainer_id = trainer.id
-      WHERE b.id = ?
-    `;
-
-    connection.query(checkBookingQuery, [bookingId], (err, bookings) => {
-      if (err) {
-        console.error('Database error:', err);
-        return res.status(500).json({
-          message: 'Database error while checking booking',
-          error: err.message,
-        });
+      if (!status || !['accepted', 'rejected'].includes(status)) {
+          return res.status(400).json({ message: 'Invalid status. Must be accepted or rejected.' });
       }
 
-      if (bookings.length === 0) {
-        return res.status(404).json({
-          message: 'Booking not found',
-          searchedId: bookingId,
-        });
+      if (decoded.role !== 'trainer') {
+          return res.status(403).json({ message: 'Access denied. Trainers only.' });
       }
 
-      const booking = bookings[0];
+      const checkBookingQuery = `
+          SELECT b.*, 
+                 user.id AS user_id, 
+                 trainer.id AS trainer_id 
+          FROM bookings b
+          JOIN users user ON b.user_id = user.id
+          JOIN users trainer ON b.trainer_id = trainer.id
+          WHERE b.id = ?
+      `;
 
-      if (booking.trainer_id !== decoded.userId) {
-        return res.status(403).json({
-          message: 'Not authorized to update this booking',
-          bookingTrainerId: booking.trainer_id,
-          requestingTrainerId: decoded.userId,
-        });
-      }
+      connection.query(checkBookingQuery, [bookingId], (err, bookings) => {
+          if (err) return res.status(500).json({ message: 'Database error', error: err.message });
 
-      // Update the booking status
-      const updateQuery = 'UPDATE bookings SET status = ? WHERE id = ?';
-      connection.query(updateQuery, [status, bookingId], (updateErr, updateResult) => {
-        if (updateErr) {
-          console.error('Update error:', updateErr);
-          return res.status(500).json({
-            message: 'Failed to update booking status',
-            error: updateErr.message,
+          if (bookings.length === 0) return res.status(404).json({ message: 'Booking not found' });
+
+          const booking = bookings[0];
+
+          if (booking.trainer_id !== decoded.userId) {
+              return res.status(403).json({ message: 'Not authorized to update this booking' });
+          }
+
+          const updateQuery = 'UPDATE bookings SET status = ? WHERE id = ?';
+          connection.query(updateQuery, [status, bookingId], (updateErr) => {
+              if (updateErr) return res.status(500).json({ message: 'Failed to update booking status' });
+
+              if (status === 'accepted') {
+                  // Store user-trainer mapping
+                  const mapQuery = `
+                      INSERT INTO trainee_trainer_map (trainee_id, trainer_id) 
+                      VALUES (?, ?) 
+                      ON DUPLICATE KEY UPDATE trainer_id = ?
+                  `;
+                  connection.query(mapQuery, [booking.user_id, booking.trainer_id, booking.trainer_id], (mapErr) => {
+                      if (mapErr) return res.status(500).json({ message: 'Failed to save trainee-trainer mapping' });
+                  });
+              }
+
+              res.json({ message: `Booking ${status} successfully` });
           });
-        }
-
-        if (updateResult.affectedRows === 0) {
-          return res.status(404).json({
-            message: 'Booking could not be updated',
-            updateResult,
-          });
-        }
-
-        // Respond with updated booking details
-        res.status(200).json({
-          message: `Booking ${status} successfully`,
-          booking: {
-            id: bookingId,
-            status: status,
-            trainee_name: booking.trainee_name, // Include trainee name
-            trainer_name: booking.trainer_name, // Include trainer name
-            updated_at: new Date(),
-          },
-        });
       });
-    });
   } catch (err) {
-    console.error('Request processing error:', err);
-    return res.status(401).json({
-      message: 'Invalid token or processing error',
-      error: err.message,
-    });
+      res.status(401).json({ message: 'Invalid token', error: err.message });
   }
 });
 
@@ -437,47 +400,39 @@ app.post('/api/auth/login', async (req, res) => {
 app.get('/api/workout_routines/:userId', (req, res) => {
   const userId = req.params.userId;
   const token = req.headers.authorization?.split(' ')[1];
-  
+
   if (!token) {
     return res.status(401).json({ message: 'Unauthorized' });
   }
 
   try {
     const decoded = jwt.verify(token, 'your_jwt_secret');
-    
-    // Verify if the requester is a trainer
-    if (decoded.role !== 'trainer') {
-      return res.status(403).json({ message: 'Access denied. Trainers only.' });
-    }
 
-    // Fetch workout routines
-    const query = `
-      SELECT id, user_id, body_part, exercises 
-      FROM workout_routines 
-      WHERE user_id = ?
-      ORDER BY id DESC
-    `;
-    
-    connection.query(query, [userId], (err, results) => {
-      if (err) {
-        console.error('Error fetching workout routines:', err);
-        return res.status(500).json({ message: 'Error fetching workout routines' });
-      }
+    const mapQuery = `SELECT trainer_id FROM trainee_trainer_map WHERE trainee_id = ?`;
+    connection.query(mapQuery, [decoded.userId], (mapErr, mapResult) => {
+      if (mapErr) return res.status(500).json({ message: 'Failed to fetch trainer mapping' });
 
-      // Parse the exercises text field to JSON if it's stored as a string
-      const formattedResults = results.map(routine => ({
-        ...routine,
-        exercises: typeof routine.exercises === 'string' 
-          ? JSON.parse(routine.exercises) 
-          : routine.exercises
-      }));
+      const trainerId = mapResult.length ? mapResult[0].trainer_id : userId;
 
-      res.json(formattedResults);
+      const query = `
+        SELECT id, user_id, body_part, exercises 
+        FROM workout_routines 
+        WHERE user_id = ?
+        ORDER BY id DESC
+      `;
+      connection.query(query, [trainerId], (err, results) => {
+        if (err) return res.status(500).json({ message: 'Error fetching workout routines' });
+
+        const formattedResults = results.map(routine => ({
+          ...routine,
+          exercises: typeof routine.exercises === 'string' ? JSON.parse(routine.exercises) : routine.exercises,
+        }));
+
+        res.json(formattedResults);
+      });
     });
-
   } catch (err) {
-    console.error('Token verification failed:', err);
-    return res.status(401).json({ message: 'Invalid token' });
+    res.status(401).json({ message: 'Invalid token', error: err.message });
   }
 });
 
@@ -485,38 +440,34 @@ app.get('/api/workout_routines/:userId', (req, res) => {
 app.get('/api/diet_entries/:userId', (req, res) => {
   const userId = req.params.userId;
   const token = req.headers.authorization?.split(' ')[1];
-  
+
   if (!token) {
     return res.status(401).json({ message: 'Unauthorized' });
   }
 
   try {
     const decoded = jwt.verify(token, 'your_jwt_secret');
-    
-    // Verify if the requester is a trainer
-    if (decoded.role !== 'trainer') {
-      return res.status(403).json({ message: 'Access denied. Trainers only.' });
-    }
 
-    // Fetch diet entries
-    const query = `
-      SELECT id, user_id, meal, food_name, calories, created_at 
-      FROM diet_entries 
-      WHERE user_id = ?
-      ORDER BY created_at DESC
-    `;
-    
-    connection.query(query, [userId], (err, results) => {
-      if (err) {
-        console.error('Error fetching diet entries:', err);
-        return res.status(500).json({ message: 'Error fetching diet entries' });
-      }
-      res.json(results);
+    const mapQuery = `SELECT trainer_id FROM trainee_trainer_map WHERE trainee_id = ?`;
+    connection.query(mapQuery, [decoded.userId], (mapErr, mapResult) => {
+      if (mapErr) return res.status(500).json({ message: 'Failed to fetch trainer mapping' });
+
+      const trainerId = mapResult.length ? mapResult[0].trainer_id : userId;
+
+      const query = `
+        SELECT id, user_id, meal, food_name, calories, created_at 
+        FROM diet_entries 
+        WHERE user_id = ?
+        ORDER BY created_at DESC
+      `;
+      connection.query(query, [trainerId], (err, results) => {
+        if (err) return res.status(500).json({ message: 'Error fetching diet entries' });
+
+        res.json(results);
+      });
     });
-
   } catch (err) {
-    console.error('Token verification failed:', err);
-    return res.status(401).json({ message: 'Invalid token' });
+    res.status(401).json({ message: 'Invalid token', error: err.message });
   }
 });
 

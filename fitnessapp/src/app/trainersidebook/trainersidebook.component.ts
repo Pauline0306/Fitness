@@ -20,11 +20,11 @@ export class TrainersidebookComponent {
   toggleWorkout(traineeId: number) {
     const trainee = this.trainees.find((t) => t.id === traineeId);
     if (trainee) {
-      if (!trainee.workoutRoutines) {
+      if (!trainee.workouts) {
         this.authService.getWorkoutRoutines(traineeId).subscribe({
           next: (data) => {
-            trainee.workoutRoutines = data;
-            trainee.showWorkout = !trainee.showWorkout;
+            trainee.workouts = data;
+            trainee.showWorkout = true;
           },
           error: (err) => {
             console.error('Error fetching workout routines:', err);
@@ -40,7 +40,6 @@ export class TrainersidebookComponent {
       }
     }
   }
-  
 
   toggleDiet(traineeId: number) {
     const trainee = this.trainees.find((t) => t.id === traineeId);
@@ -49,7 +48,7 @@ export class TrainersidebookComponent {
         this.authService.getDietEntries(traineeId).subscribe({
           next: (data) => {
             trainee.dietEntries = data;
-            trainee.showDiet = !trainee.showDiet;
+            trainee.showDiet = true;
           },
           error: (err) => {
             console.error('Error fetching diet entries:', err);
@@ -65,8 +64,7 @@ export class TrainersidebookComponent {
       }
     }
   }
-  
-  
+
   updateBookingStatus(bookingId: number, status: string) {
     Swal.fire({
       title: 'Are you sure?',
