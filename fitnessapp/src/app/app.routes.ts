@@ -23,7 +23,8 @@ export const routes: Routes = [
     { path: 'messages', component: MessagesComponent},
     { path: 'about', component: AboutComponent},
     { path: 'bookings', component:BookingsComponent},
-    { path: 'trainersidebook', component: TrainersidebookComponent}
+    { path: 'trainersidebook', component: TrainersidebookComponent},
+    { path: '', redirectTo: '/home', pathMatch: 'full' },
 ];
 
 @NgModule({
