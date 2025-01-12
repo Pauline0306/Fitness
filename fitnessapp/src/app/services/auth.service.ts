@@ -17,11 +17,11 @@ export class AuthService {
   private apiUrl = 'http://localhost:3000/api';
   private currentUserSubject: BehaviorSubject<User | null>;
   public currentUser: Observable<User | null>;
-  private workoutUpdatesSubject = new BehaviorSubject<any[]>([]);
-  private dietUpdatesSubject = new BehaviorSubject<any[]>([]);
-
-  workoutUpdates$ = this.workoutUpdatesSubject.asObservable();
-  dietUpdates$ = this.dietUpdatesSubject.asObservable();
+  private workoutUpdates: { [traineeId: number]: BehaviorSubject<any[]> } = {};
+  private dietUpdates: { [traineeId: number]: BehaviorSubject<any[]> } = {};
+  
+  // Poll interval in milliseconds (e.g., 10000 = 10 seconds)
+  private readonly POLL_INTERVAL = 10000;
 
   constructor(private http: HttpClient) {
     this.currentUserSubject = new BehaviorSubject<User | null>(
@@ -42,6 +42,9 @@ export class AuthService {
   public get userRole(): string | null {
     return this.currentUserValue?.role || null; // Assuming `role` exists on the user object
   }
+  
+
+  
 
   register(user: User): Observable<any> {
     return this.http.post(`${this.apiUrl}/auth/register`, user);
@@ -58,6 +61,7 @@ export class AuthService {
       })
     );
   }
+  
 
   logout() {
     localStorage.removeItem('currentUser');
