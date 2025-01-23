@@ -1,0 +1,137 @@
+<div class="main-content">
+  <div class="logo-large">
+    <img src="assets/images/FitConnectLogo.png" alt="FitConnect Logo" />
+  </div>
+  <div class="login-form">
+    <h2 class="text-center mb-4">Register</h2>
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label for="name">Name</label>
+        <input type="text" id="name" formControlName="name" class="form-control"
+               [ngClass]="{ 'is-invalid': submitted && registerForm.get('name')?.errors }" />
+        <div *ngIf="submitted && registerForm.get('name')?.errors" class="invalid-feedback">
+          <div *ngIf="registerForm.get('name')?.errors?.['required']">Name is required</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" formControlName="email" class="form-control"
+               [ngClass]="{ 'is-invalid': submitted && registerForm.get('email')?.errors }" />
+        <div *ngIf="submitted && registerForm.get('email')?.errors" class="invalid-feedback">
+          <div *ngIf="registerForm.get('email')?.errors?.['required']">Email is required</div>
+          <div *ngIf="registerForm.get('email')?.errors?.['email']">Email must be valid</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" formControlName="password" class="form-control"
+               [ngClass]="{ 'is-invalid': submitted && registerForm.get('password')?.errors }" />
+        <div *ngIf="submitted && registerForm.get('password')?.errors" class="invalid-feedback">
+          <div *ngIf="registerForm.get('password')?.errors?.['required']">Password is required</div>
+          <div *ngIf="registerForm.get('password')?.errors?.['minlength']">
+            Password must be at least 6 characters
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="role">Role</label>
+        <select id="role" formControlName="role" class="form-control" (change)="onRoleChange()"
+                [ngClass]="{ 'is-invalid': submitted && registerForm.get('role')?.errors }">
+          <option value="trainee">Trainee</option>
+          <option value="trainer">Trainer</option>
+        </select>
+      </div>
+
+      <!-- Trainee-specific fields -->
+      <div *ngIf="registerForm.get('role')?.value === 'trainee'" @fadeAnimation>
+        <div class="form-group">
+          <label for="age">Age</label>
+          <input type="number" id="age" formControlName="age" class="form-control"
+                 [ngClass]="{ 'is-invalid': submitted && registerForm.get('age')?.errors }" />
+          <div *ngIf="submitted && registerForm.get('age')?.errors" class="invalid-feedback">
+            <div *ngIf="registerForm.get('age')?.errors?.['required']">Age is required</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="gender">Gender</label>
+          <select id="gender" formControlName="gender" class="form-control"
+                  [ngClass]="{ 'is-invalid': submitted && registerForm.get('gender')?.errors }">
+            <option value="">Select Gender</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+            <option value="other">Other</option>
+          </select>
+          <div *ngIf="submitted && registerForm.get('gender')?.errors" class="invalid-feedback">
+            <div *ngIf="registerForm.get('gender')?.errors?.['required']">Gender is required</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="height">Height (cm)</label>
+          <input type="number" id="height" formControlName="height" class="form-control"
+                 [ngClass]="{ 'is-invalid': submitted && registerForm.get('height')?.errors }" />
+          <div *ngIf="submitted && registerForm.get('height')?.errors" class="invalid-feedback">
+            <div *ngIf="registerForm.get('height')?.errors?.['required']">Height is required</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="weight">Weight (kg)</label>
+          <input type="number" id="weight" formControlName="weight" class="form-control"
+                 [ngClass]="{ 'is-invalid': submitted && registerForm.get('weight')?.errors }" />
+          <div *ngIf="submitted && registerForm.get('weight')?.errors" class="invalid-feedback">
+            <div *ngIf="registerForm.get('weight')?.errors?.['required']">Weight is required</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Trainer-specific fields -->
+      <div *ngIf="registerForm.get('role')?.value === 'trainer'" @fadeAnimation>
+        <div class="form-group">
+          <label for="qualifications">Qualifications</label>
+          <textarea id="qualifications" formControlName="qualifications" class="form-control"
+                    [ngClass]="{ 'is-invalid': submitted && registerForm.get('qualifications')?.errors }"></textarea>
+          <div *ngIf="submitted && registerForm.get('qualifications')?.errors" class="invalid-feedback">
+            <div *ngIf="registerForm.get('qualifications')?.errors?.['required']">Qualifications are required</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="experience">Experience</label>
+          <textarea id="experience" formControlName="experience" class="form-control"
+                    [ngClass]="{ 'is-invalid': submitted && registerForm.get('experience')?.errors }"></textarea>
+          <div *ngIf="submitted && registerForm.get('experience')?.errors" class="invalid-feedback">
+            <div *ngIf="registerForm.get('experience')?.errors?.['required']">Experience is required</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="specialization">Specialization</label>
+          <input type="text" id="specialization" formControlName="specialization" class="form-control"
+                 [ngClass]="{ 'is-invalid': submitted && registerForm.get('specialization')?.errors }" />
+          <div *ngIf="submitted && registerForm.get('specialization')?.errors" class="invalid-feedback">
+            <div *ngIf="registerForm.get('specialization')?.errors?.['required']">Specialization is required</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="availability">Availability</label>
+          <textarea id="availability" formControlName="availability" class="form-control"
+                    [ngClass]="{ 'is-invalid': submitted && registerForm.get('availability')?.errors }"></textarea>
+          <div *ngIf="submitted && registerForm.get('availability')?.errors" class="invalid-feedback">
+            <div *ngIf="registerForm.get('availability')?.errors?.['required']">Availability is required</div>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn btn-primary btn-block mt-4">Register</button>
+    </form>
+    <div class="text-center mt-3">
+      <a routerLink="/login">Already have an account? Login</a>
+    </div>
+  </div>
+</div>

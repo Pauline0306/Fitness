@@ -1,0 +1,53 @@
+<!-- Sidebar Navigation -->
+<div class="sidebar">
+  <!-- Logo -->
+  <div class="logo">
+    <img src="assets/images/FitConnectLogo.png" alt="FitConnect Logo" class="logo-img" />
+    <h1>Fit<span>Connect</span></h1>
+  </div>
+
+  <!-- Navigation Links -->
+  <nav class="nav">
+    <!-- Home Link -->
+    <a class="nav-item" [routerLink]="homeLink" routerLinkActive="active">
+      <img src="assets/images/home.png" alt="Home Icon" class="nav-icon" />
+      <span>Home</span>
+    </a>
+
+    <!-- Messages Link -->
+    <a class="nav-item" routerLink="/messages" routerLinkActive="active">
+      <img src="assets/images/chat.png" alt="Messages Icon" class="nav-icon" />
+      <span>Messages</span>
+    </a>
+
+    <!-- Bookings Link -->
+    <a 
+      *ngIf="userRole === 'trainee'" 
+      class="nav-item" 
+      routerLink="/bookings" 
+      routerLinkActive="active">
+      <img src="assets/images/open-book.png" alt="Bookings Icon" class="nav-icon" />
+      <span>Bookings</span>
+    </a>
+    <a 
+      *ngIf="userRole === 'trainer'" 
+      class="nav-item" 
+      routerLink="/trainersidebook" 
+      routerLinkActive="active">
+      <img src="assets/images/open-book.png" alt="Bookings Icon" class="nav-icon" />
+      <span>Bookings</span>
+    </a>
+  </nav>
+
+  <!-- Profile Section -->
+  <div class="profile">
+    <p>{{ userName }}</p>
+    <small>{{ userRole }}</small>
+    <div class="logout-btn">
+      <button class="logout-button" (click)="logout()">
+        <span>Logout</span>
+        <img src="assets/images/logout.png" alt="Logout Icon" class="logout-icon" />
+      </button>
+    </div>
+  </div>
+</div>

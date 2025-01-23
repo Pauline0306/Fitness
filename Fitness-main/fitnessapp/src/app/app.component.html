@@ -1,0 +1,5 @@
+<app-navbar></app-navbar>
+<app-sidebar *ngIf="showSidebar"></app-sidebar>
+<main [@fadeAnimation]="prepareRoute(outlet)" [@slideAnimation]="prepareRoute(outlet)">
+  <router-outlet #outlet="outlet"></router-outlet>
+</main>

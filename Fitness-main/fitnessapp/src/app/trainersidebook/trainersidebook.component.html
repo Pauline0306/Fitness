@@ -1,0 +1,174 @@
+<div class="layout">
+  <app-sidebar></app-sidebar>
+  
+  <div class="dashboard">
+    <!-- Booking Requests Section -->
+    <section class="booking-requests">
+      <h2>Booking Requests</h2>
+      <div *ngIf="bookings && bookings.length > 0">
+        <div *ngFor="let booking of bookings" class="booking-card">
+          <div class="booking-details">
+            <h3>{{ booking.trainee_name }}</h3>
+            <p>Start Date: {{ booking.start_date | date:'mediumDate' }}</p>
+            <p>End Date: {{ booking.end_date | date:'mediumDate' }}</p>
+            <p>Goals: {{ booking.fitness_goal || 'No goals specified' }}</p>
+          </div>
+
+          <div class="booking-actions" *ngIf="booking.status === 'pending'">
+            <button class="accept-btn" (click)="updateBookingStatus(booking.id, 'accepted')">Accept</button>
+            <button class="reject-btn" (click)="updateBookingStatus(booking.id, 'rejected')">Reject</button>
+          </div>
+        </div>
+      </div>
+      
+      <div *ngIf="bookings?.length === 0" class="no-bookings">
+        <p>No pending booking requests</p>
+      </div>
+    </section>
+
+    <!-- Active Trainees Section -->
+    <section class="active-trainees">
+      <h2>Active Trainees</h2>
+      <div *ngFor="let trainee of trainees" class="trainee-card">
+        <h3>{{ trainee.trainee_name }}</h3>
+
+       
+          
+          
+
+        <!-- Workout Management -->
+       <div class="workout-management">
+        <h4>Workout Routines</h4>
+        
+  
+    
+       <!-- Add Workout Form -->
+<form class="add-workout-form" (ngSubmit)="addWorkoutRoutine(trainee)">
+  <div class="form-group">
+    <label for="bodyPart-{{trainee.user_id}}">Body Part:</label>
+    <input
+      id="bodyPart-{{trainee.user_id}}"
+      [(ngModel)]="trainee.workoutForm.body_part"
+      name="bodyPart"
+      type="text"
+      class="form-control"
+      placeholder="e.g., Chest, Legs, Back"
+      required
+    />
+  </div>
+
+  <div class="form-group">
+    <label for="exercises-{{trainee.user_id}}">Exercises:</label>
+    <textarea
+      id="exercises-{{trainee.user_id}}"
+      [(ngModel)]="trainee.workoutForm.exercises"
+      name="exercises"
+      class="form-control"
+      placeholder="List exercises (e.g., Push-ups 3x10, Squats 4x12)"
+      required
+    ></textarea>
+  </div>
+
+  <button type="submit" class="btn btn-primary">Add Workout</button>
+</form>
+
+      
+        <!-- Workout List -->
+   <!-- Workout List -->
+<!-- Workout List -->
+<!-- Workout List -->
+<div class="workout-list">
+  <!-- Handle errors -->
+  <div *ngIf="trainee.workouts === null" class="text-red-500">Workouts data is null</div>
+  <div *ngIf="trainee.workouts === undefined" class="text-red-500">Workouts data is undefined</div>
+  <div *ngIf="trainee.workouts?.length === 0" class="text-yellow-500">No workouts found for this trainee</div>
+  
+  <!-- Display workouts -->
+  <ng-container *ngIf="trainee.workouts && trainee.workouts.length > 0">
+    <div class="workout-items-container">
+      <div *ngFor="let workout of trainee.workouts" class="workout-item horizontal-layout">
+        <div class="workout-details">
+          <div *ngIf="editingWorkout.id !== workout.id">
+            <h5 class="font-semibold">{{ workout.body_part }}</h5>
+            <p class="whitespace-pre-line">{{ workout.exercises }}</p>
+            <p class="completion-status">
+              Completion Status: {{ workout.is_completed ? 'Completed' : 'Not Completed' }}
+            </p>
+            <button class="btn btn-primary" (click)="startEditing(workout)">Edit</button>
+            <button class="btn btn-danger" (click)="deleteWorkout(workout.id, trainee.user_id)">Delete</button>
+          </div>
+
+          <!-- Edit Form -->
+          <div *ngIf="editingWorkout.id === workout.id">
+            <div class="form-group">
+              <label>Body Part:</label>
+              <input
+                [(ngModel)]="editingWorkout.body_part"
+                class="form-control"
+                type="text"
+                required
+              />
+            </div>
+            <div class="form-group mt-2">
+              <label>Exercises:</label>
+              <textarea
+                [(ngModel)]="editingWorkout.exercises"
+                class="form-control"
+                required
+              ></textarea>
+            </div>
+            <div class="mt-3">
+              <button class="btn btn-success mr-2" (click)="saveWorkoutEdit(trainee.user_id)">Save</button>
+              <button class="btn btn-secondary" (click)="cancelEditing()">Cancel</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</div>
+
+
+
+
+
+
+        <!-- Diet Management -->
+       <!-- Diet Management -->
+<div class="diet-management">
+  <h4>Diet Recommendation</h4>
+  
+  <!-- Add Diet Recommendation Form -->
+  <form class="add-diet-form" (ngSubmit)="addDietRecommendation(trainee)">
+    <div class="form-group">
+      <textarea
+        [(ngModel)]="trainee.newDietRecommendation"
+        name="dietRecommendation"
+        class="form-control"
+        placeholder="Enter diet recommendation"
+        required
+      ></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">Add Diet Recommendation</button>
+  </form>
+
+  <!-- Diet Recommendation List -->
+  <div *ngIf="dietRecommendations[trainee.user_id]" class="diet-recommendations mt-3">
+    <div 
+      *ngFor="let recommendation of dietRecommendations[trainee.user_id]" 
+      class="diet-recommendation-item"
+    >
+      <p>{{ recommendation.recommendation }}</p>
+      <p class="text-muted small">
+        Created: {{ recommendation.created_at | date:'mediumDate' }}
+      </p>
+      <button 
+        (click)="deleteDietRecommendation(recommendation.id, trainee.user_id)"
+        class="btn btn-sm btn-danger"
+      >
+        Delete
+      </button>
+    </div>
+  </div>
+</div>
+  </div>

@@ -1,0 +1,64 @@
+.layout {
+  display: flex; /* Align elements side by side */
+  height: 100vh; /* Full height of the viewport */
+  width: 100vw; /* Full width of the viewport */
+}
+
+app-sidebar {
+  width: 20%; /* Sidebar occupies 20% of the width */
+}
+
+.main-content {
+  flex-grow: 1; /* Remaining width for the routed components */
+  /* Handle overflow */
+}
+/* app.component.css */
+main {
+  position: relative;
+  overflow: hidden;
+  min-height: calc(100vh - 60px); /* Adjust based on your navbar height */
+}
+
+/* Add these to your existing navbar and sidebar CSS */
+.nav-links a, .nav-item {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.nav-links a::after, .nav-item::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 2px;
+  bottom: -2px;
+  left: 0;
+  background-color: #007bff;
+  transition: width 0.3s ease;
+}
+
+.nav-links a:hover::after, .nav-item:hover::after {
+  width: 100%;
+}
+
+.nav-links a.active::after, .nav-item.active::after {
+  width: 100%;
+}
+
+/* Add hover effect for sidebar icons */
+.nav-icon {
+  transition: transform 0.3s ease;
+}
+
+.nav-item:hover .nav-icon {
+  transform: scale(1.1);
+}
+
+/* Smooth transition for logout button */
+.logout-button {
+  transition: all 0.3s ease;
+}
+
+.logout-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}

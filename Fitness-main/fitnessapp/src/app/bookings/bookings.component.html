@@ -1,0 +1,147 @@
+<div class="layout">
+  <app-sidebar></app-sidebar>
+
+  <div class="dashboard">
+    <!-- Available Trainers Section -->
+    <section class="trainers-section">
+      <h2>Available Trainers</h2>
+      <div class="trainers-grid">
+        <div *ngFor="let trainer of trainers" class="trainer-card" (click)="viewTrainerDetails(trainer)">
+          <h3>{{ trainer.name }}</h3>
+          <button mat-raised-button color="primary" class="view-details-btn">View Details</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Trainer Details and Booking Modal -->
+    <div *ngIf="selectedTrainer" class="modal">
+      <div class="modal-content">
+        <h2 class="modal-title">{{ selectedTrainer.name }}</h2>
+
+        <section class="qualifications" *ngIf="selectedTrainer.qualifications">
+          <h3>Qualifications</h3>
+          <ul>
+            <li *ngFor="let qual of getQualifications(selectedTrainer.qualifications)">
+              {{ qual }}
+            </li>
+          </ul>
+        </section>
+
+        <section class="experience">
+          <h3>Experience</h3>
+          <p>{{ selectedTrainer.experience }}</p>
+        </section>
+
+        <section class="availability">
+          <h3>Availability</h3>
+          <p>{{ selectedTrainer.availability }}</p>
+        </section>
+
+        <form class="booking-form">
+          <h3>Book Training Period</h3>
+          
+          <!-- Health History -->
+          <mat-form-field class="full-width">
+            <mat-label>Health History</mat-label>
+            <textarea matInput
+                      [(ngModel)]="newBooking.healthHistory"
+                      name="healthHistory"
+                      required
+                      placeholder="Please describe your health history"
+                      rows="3"></textarea>
+          </mat-form-field>
+
+          <!-- Medication History -->
+          <mat-form-field class="full-width">
+            <mat-label>Medication History</mat-label>
+            <textarea matInput
+                      [(ngModel)]="newBooking.medicationHistory"
+                      name="medicationHistory"
+                      placeholder="Please list any current medications (optional)"
+                      rows="3"></textarea>
+          </mat-form-field>
+
+          <!-- Fitness Goal -->
+          <mat-form-field class="full-width">
+            <mat-label>Fitness Goal</mat-label>
+            <textarea matInput
+                      [(ngModel)]="newBooking.fitnessGoal"
+                      name="fitnessGoal"
+                      required
+                      placeholder="What are your fitness goals?"
+                      rows="3"></textarea>
+          </mat-form-field>
+
+          <!-- Preferred Schedule -->
+          <mat-form-field class="full-width">
+            <mat-label>Preferred Schedule</mat-label>
+            <input matInput
+                   [(ngModel)]="newBooking.preferredSchedule"
+                   name="preferredSchedule"
+                   required
+                   placeholder="e.g., Mornings, Evenings, Weekends">
+          </mat-form-field>
+
+          <!-- Experience Level -->
+          <mat-form-field class="full-width">
+            <mat-label>Experience Level</mat-label>
+            <mat-select [(ngModel)]="newBooking.experienceLevel" name="experienceLevel" required>
+              <mat-option *ngFor="let level of experienceLevels" [value]="level">
+                {{level | titlecase}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <div class="date-fields">
+            <!-- Start Date -->
+           <mat-form-field appearance="fill">
+  <mat-label>Start Date</mat-label>
+  <input matInput [matDatepicker]="picker1" [(ngModel)]="newBooking.startDate" name="startDate">
+  <mat-datepicker-toggle matIconSuffix [for]="picker1"></mat-datepicker-toggle>
+  <mat-datepicker #picker1></mat-datepicker>
+</mat-form-field>
+
+<mat-form-field appearance="fill">
+  <mat-label>End Date</mat-label>
+  <input matInput [matDatepicker]="picker2" [(ngModel)]="newBooking.endDate" name="endDate">
+  <mat-datepicker-toggle matIconSuffix [for]="picker2"></mat-datepicker-toggle>
+  <mat-datepicker #picker2></mat-datepicker>
+</mat-form-field>
+
+          </div>
+
+          <div class="form-actions">
+            <button mat-raised-button
+                    color="primary"
+                    (click)="submitBooking()"
+                    class="submit-btn">
+              Submit Booking Request
+            </button>
+            <button mat-button
+                    color="warn"
+                    (click)="selectedTrainer = null"
+                    class="cancel-btn">
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <!-- Bookings Status Section -->
+    <section class="my-bookings-section">
+      <h2>My Bookings</h2>
+      <div class="bookings-grid">
+        <div *ngFor="let booking of bookings" class="booking-card">
+          <h3>{{ booking.trainerId }}</h3>
+          <p>Status: {{ booking.status | titlecase }}</p>
+          <p>Start Date: {{ booking.startDate | date }}</p>
+          <p>End Date: {{ booking.endDate | date }}</p>
+          <p>Fitness Goal: {{ booking.fitnessGoal }}</p>
+        </div>
+      </div>
+    </section>
+    
+
+    
+  </div>
+</div>
