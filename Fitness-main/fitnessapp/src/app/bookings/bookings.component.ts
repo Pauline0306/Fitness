@@ -13,6 +13,8 @@ import { MatInputModule } from '@angular/material/input';
 import { AuthService } from '../services/auth.service';
 import { Router } from '@angular/router';
 import { MatSelectModule } from '@angular/material/select';
+import { BehaviorSubject, interval } from 'rxjs';
+import Swal from 'sweetalert2'; // Import SweetAlert2
 
 @Component({
   selector: 'app-bookings',
@@ -45,7 +47,10 @@ export class BookingsComponent implements OnInit {
   
   trainers: any[] = [];
   selectedTrainer: any = null; // Selected trainer for booking
+  bookingsSubject = new BehaviorSubject<BookingRequest[]>([]);
+  bookings$ = this.bookingsSubject.asObservable();
   bookings: BookingRequest[] = [];
+  bookedTrainerIds: number[] = [];
   isLoading = false;
   newBooking: any = {}; // Booking form data
   myBookings: any[] = []; // Bookings by the user
@@ -62,21 +67,49 @@ export class BookingsComponent implements OnInit {
       this.router.navigate(['/login']);
       return;
     }
-
+  
     if (this.authService.userRole !== 'trainee') {
       this.snackBar.open('Only trainees can access this page', 'Close', { duration: 3000 });
       this.router.navigate(['/dashboard']);
       return;
     }
+  
+    this.loadAvailableTrainers();
 
-    this.loadAvailableTrainers(); 
-    this.loadBookings(); // Load bookings when component initializes
+    
+  
+    // Subscribe to bookings observable
+    this.bookings$.subscribe((bookings) => {
+      this.bookings = bookings;
+      this.loadMyBookings();
+    });
+  
+    this.loadBookings();
+
+    interval(8000).subscribe(() => {
+      this.loadBookings(); // Automatically refresh bookings
+    });
   }
+  
+
+  
 
   loadAvailableTrainers(): void {
     this.bookingService.getAvailableTrainers().subscribe(
       (trainers) => {
-        this.trainers = trainers; // Filtered list of trainers
+        this.trainers = trainers; // Load all trainers without filtering
+  
+        // Optional: You can add a property to indicate if the trainer is booked
+        this.trainers.forEach((trainer) => {
+          trainer.isBooked = this.bookings.some(
+            (booking) => booking.trainerId === trainer.id &&
+              (booking.status === 'pending' || booking.status === 'accepted')
+          );
+        });
+  
+        if (this.trainers.length === 0) {
+          console.log('No trainers available at the moment.');
+        }
       },
       (error) => {
         console.error('Error fetching available trainers:', error);
@@ -84,6 +117,9 @@ export class BookingsComponent implements OnInit {
       }
     );
   }
+  
+  
+
   loadMyBookings(): void {
     this.myBookings = this.bookings.filter(
       (booking) => {
@@ -99,6 +135,12 @@ export class BookingsComponent implements OnInit {
   
 
   viewTrainerDetails(trainer: TrainerProfile) {
+    // Check if trainer is already booked
+    if (this.bookedTrainerIds.includes(trainer.id)) {
+      this.snackBar.open('This trainer is already booked.', 'Close', { duration: 3000 });
+      return;
+    }
+
     this.selectedTrainer = {
       ...trainer,
       qualifications: typeof trainer.qualifications === 'string'
@@ -108,38 +150,91 @@ export class BookingsComponent implements OnInit {
     this.newBooking.trainerId = trainer.id;
   }
  
+ 
   submitBooking(): void {
-    if (!this.selectedTrainer) {
-      this.snackBar.open('No trainer selected. Please select a trainer before submitting.', 'Close', { duration: 3000 });
+    const hasExistingBooking = this.bookings.some(
+      (booking) =>
+        booking.userId === this.authService.currentUserValue?.id &&
+        (booking.status === 'pending' || booking.status === 'accepted')
+    );
+  
+    if (hasExistingBooking) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Active Booking Found',
+        text: 'You already have a pending or accepted booking.',
+        confirmButtonText: 'Close',
+      });
       return;
     }
   
-    const bookingData = {
-      ...this.newBooking,
-      trainerId: this.selectedTrainer.id
+    const validationError = this.validateBooking();
+    if (validationError) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Validation Error',
+        text: validationError,
+        confirmButtonText: 'Close',
+      });
+      return;
+    }
+  
+    if (!this.selectedTrainer) {
+      Swal.fire({
+        icon: 'info',
+        title: 'No Trainer Selected',
+        text: 'Please select a trainer before submitting.',
+        confirmButtonText: 'Close',
+      });
+      return;
+    }
+  
+    const bookingData: BookingRequest = {
+      trainerId: this.selectedTrainer.id,
+      health_history: this.newBooking.health_history,
+      medication_history: this.newBooking.medication_history,
+      fitness_goal: this.newBooking.fitness_goal,
+      preferred_schedule: this.newBooking.preferred_schedule,
+      experience_level: this.newBooking.experience_level,
+      start_date: this.newBooking.start_date,
+      end_date: this.newBooking.end_date,
+      traineeId: this.authService.currentUserValue?.id,
+      status: 'pending',
+      userId: 0,
     };
   
     this.bookingService.createBooking(bookingData).subscribe(
-      (response) => {
-        // Remove the booked trainer from available trainers
-        this.trainers = this.trainers.filter((trainer) => trainer.id !== this.selectedTrainer!.id);
+      (newBooking) => {
+        const updatedBookings = [...this.bookingsSubject.value, newBooking];
+        this.bookingsSubject.next(updatedBookings); // Automatically refresh
+        this.resetForm();
+        this.selectedTrainer = null;
   
-        // Add the new booking to "My Bookings"
-        this.myBookings.push({
-          trainer: this.selectedTrainer,
-          ...this.newBooking,
-          status: 'pending' // Default status
+        Swal.fire({
+          icon: 'success',
+          title: 'Booking Submitted',
+          text: 'Your booking has been submitted successfully!',
+          confirmButtonText: 'Close',
         });
   
-        this.selectedTrainer = null;
-        this.snackBar.open('Booking submitted successfully!', 'Close', { duration: 3000 });
+        this.loadAvailableTrainers();
       },
       (error) => {
         console.error('Error submitting booking:', error);
-        this.snackBar.open('Failed to submit booking. Please try again.', 'Close', { duration: 3000 });
+        Swal.fire({
+          icon: 'error',
+          title: 'Booking Submission Failed',
+          text: 'You already have a booking submitted to a trainer.',
+          confirmButtonText: 'Close',
+        });
       }
     );
   }
+  
+  
+  
+  
+  
   
 
 
@@ -151,16 +246,16 @@ export class BookingsComponent implements OnInit {
     this.isLoading = true;
     this.bookingService.getBookings().subscribe({
       next: (bookings) => {
-        this.bookings = bookings;
+        this.bookingsSubject.next(bookings); // Automatically update the subject
         this.isLoading = false;
       },
       error: (error) => {
         this.isLoading = false;
-        console.error('Error loading bookings:', error);
-        this.snackBar.open('Error loading bookings', 'Close', { duration: 3000 });
+
       },
     });
   }
+  
 
 
   
@@ -170,19 +265,19 @@ export class BookingsComponent implements OnInit {
     if (!this.newBooking.trainerId) {
       return 'Please select a trainer';
     }
-    if (!this.newBooking.healthHistory?.trim()) {
+    if (!this.newBooking.health_history?.trim()) {
       return 'Health history is required';
     }
-    if (!this.newBooking.fitnessGoal?.trim()) {
+    if (!this.newBooking.fitness_goal?.trim()) {
       return 'Fitness goal is required';
     }
-    if (!this.newBooking.preferredSchedule?.trim()) {
+    if (!this.newBooking.preferred_schedule?.trim()) {
       return 'Preferred schedule is required';
     }
-    if (!this.newBooking.experienceLevel) {
+    if (!this.newBooking.experience_level) {
       return 'Experience level is required';
     }
-    if (!this.newBooking.startDate || !this.newBooking.endDate) {
+    if (!this.newBooking.start_date || !this.newBooking.end_date) {
       return 'Both start and end dates are required';
     }
 
@@ -197,7 +292,7 @@ export class BookingsComponent implements OnInit {
     if (end <= start) {
       return 'End date must be after start date';
     }
-    if (!this.experienceLevels.includes(this.newBooking.experienceLevel)) {
+    if (!this.experienceLevels.includes(this.newBooking.experience_level)) {
       return 'Invalid experience level selected';
     }
 
@@ -217,4 +312,6 @@ export class BookingsComponent implements OnInit {
       endDate: null
     };
   }
+
+  
 }

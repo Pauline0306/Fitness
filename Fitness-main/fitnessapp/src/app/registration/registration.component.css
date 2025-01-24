@@ -56,6 +56,7 @@ body {
   color: #007bff;
   border-bottom: 2px solid #007bff;
 }
+
 /* Main Content */
 .main-content {
   display: flex;
@@ -93,19 +94,41 @@ body {
 
 .form-group {
   margin-bottom: 15px;
-  
-}
-.form-group select{
-  margin-left: 10px;
-
 }
 
-.form-group input {
+.form-group input,
+.form-group textarea,
+.form-group select {
   width: 100%;
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 5px;
   font-size: 1rem;
+  resize: none; /* Disable textarea resizing */
+}
+
+textarea::placeholder {
+  color: #999;
+}
+
+.form-group select {
+  margin-left: 10px;
+}
+
+/* Hover and focus states for inputs and textareas */
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  border-color: #007bff;
+  outline: none;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+/* Error feedback */
+.invalid-feedback {
+  font-size: 0.9rem;
+  color: red;
+  margin-top: 5px;
 }
 
 .options {
@@ -154,4 +177,3 @@ button:hover {
 .login-form a:hover {
   text-decoration: underline;
 }
-

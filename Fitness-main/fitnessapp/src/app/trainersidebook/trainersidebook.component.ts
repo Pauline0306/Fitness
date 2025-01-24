@@ -22,6 +22,7 @@ interface Booking {
   fitnessGoal?: string;
   current_weight?: number;
   target_weight?: number;
+  
 }
 
 interface WorkoutForm {
@@ -61,6 +62,7 @@ interface Trainee {
   workoutForm: WorkoutForm;
   dietRecommendation: string;
   newDietRecommendation: string; // Separate recommendation for each trainee
+  goals?: any[];
 }
 interface EditableWorkout {
   id: number;
@@ -93,6 +95,7 @@ export class TrainersidebookComponent implements OnInit, OnDestroy {
   dietRecommendations: { [key: number]: DietRecommendation[] } = {}; // Keyed by user ID
   private refreshSubscription?: Subscription;
   private readonly REFRESH_INTERVAL = 5000; // 5 seconds
+  goals: any = {}; // Store the goals of each trainee
   
 
   editingWorkout: EditableWorkout = {
@@ -108,32 +111,42 @@ export class TrainersidebookComponent implements OnInit, OnDestroy {
     exercises: ''
   };
   
-
-  
-
   constructor(private authService: AuthService, private router: Router) {}
 
-  
 
   ngOnInit() {
     // Initial load
     this.loadBookings();
-    
-   
-    
-    // Set up automatic refresh
+    this.loadTraineeGoals();
+  
+    // Set up automatic refresh for bookings and trainees
     this.refreshSubscription = interval(this.REFRESH_INTERVAL).subscribe(() => {
-      this.refreshData();
+      this.refreshData(); // Refresh bookings and other data
+      this.loadTraineeGoals(); // Refresh trainee goals every interval
     });
   }
-
   
   ngOnDestroy() {
+    // Unsubscribe from the refresh interval to prevent memory leaks
     if (this.refreshSubscription) {
       this.refreshSubscription.unsubscribe();
     }
   }
+  
 
+  loadTraineeGoals(): void {
+    // Assuming `trainees` is already populated
+    this.trainees.forEach(trainee => {
+      this.authService.getTraineeGoals(trainee.user_id).subscribe(
+        (response) => {
+          this.goals[trainee.user_id] = response.data; // Store goals by user_id
+        },
+        (error) => {
+          console.error('Error fetching goals', error);
+        }
+      );
+    });
+  }
   
   startEditing(workout: any): void {
     this.editingWorkout = {
@@ -323,16 +336,29 @@ cancelEditing(): void {
     });
   }
 
-  loadBookings() {
+  loadBookings(): void {
     this.authService.getTrainerBookings().subscribe({
       next: (data: any[]) => {
-        const pendingBookings = data.filter(booking => booking.status === 'pending');
-        this.bookings = Array.from(new Map(pendingBookings.map(b => [b.id, b])).values());
+        if (!Array.isArray(data)) {
+          console.error('Unexpected response format for bookings:', data);
+          this.showError('Unexpected response format for bookings');
+          return;
+        }
   
-        const acceptedTrainees = data.filter(booking => booking.status === 'accepted');
-        const uniqueTrainees = Array.from(
-          new Map(acceptedTrainees.map(trainee => [trainee.user_id, trainee])).values()
-        ).map(trainee => ({
+        // Filter pending bookings and remove duplicates
+        this.bookings = Array.from(
+          new Map(
+            data.filter((booking) => booking.status === 'pending').map((b) => [b.id, b])
+          ).values()
+        );
+  
+        // Filter accepted bookings and transform into trainee objects
+        const acceptedTrainees = data.filter((booking) => booking.status === 'accepted');
+        this.trainees = Array.from(
+          new Map(
+            acceptedTrainees.map((trainee) => [trainee.user_id, trainee])
+          ).values()
+        ).map((trainee) => ({
           ...trainee,
           showWorkout: false,
           showDiet: false,
@@ -340,24 +366,27 @@ cancelEditing(): void {
           dietEntries: [],
           workoutForm: { body_part: '', exercises: '' },
           dietRecommendation: [],
-       
         }));
   
-        this.trainees = uniqueTrainees;
-  
-        // Fetch data for all trainees
-        this.trainees.forEach(trainee => {
-          this.refreshWorkoutData(trainee.user_id);
-          this.refreshDietRecommendations(trainee.user_id);
-          this.getTraineeGoals(trainee); // This ensures goals are fetched
+        // Fetch additional data for each trainee
+        this.trainees.forEach((trainee) => {
+          if (trainee && trainee.user_id) {
+            this.refreshWorkoutData(trainee.user_id);
+            this.refreshDietRecommendations(trainee.user_id);
+           
+            this.getTraineeGoals(trainee); // Fetch goals
+          } else {
+            console.warn('Invalid trainee object or missing user_id:', trainee);
+          }
         });
       },
       error: (err) => {
         console.error('Error fetching bookings:', err);
         this.showError('Failed to fetch bookings');
-      }
+      },
     });
   }
+  
   
   getTraineeGoals(trainee: any) {
     const userId = trainee.user_id;  // Capture userId locally
@@ -472,6 +501,8 @@ private refreshDietRecommendations(traineeId: number): void {
     }
   });
 }
+
+
 deleteDietRecommendation(recommendationId: number, traineeId: number): void {
   Swal.fire({
     title: 'Are you sure?',

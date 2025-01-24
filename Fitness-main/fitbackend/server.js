@@ -404,72 +404,72 @@ app.post('/api/bookings', (req, res) => {
             return res.status(403).json({ message: 'Access denied. Trainees only.' });
         }
 
-        // Check if trainer exists and is actually a trainer
+        // Check if the trainee already has an active booking with any trainer
         connection.query(
-            'SELECT id, role FROM users WHERE id = ?',
-            [trainerId],
-            (err, results) => {
+            'SELECT id, trainer_id, status FROM bookings WHERE user_id = ? AND (status = "pending" OR status = "accepted")',
+            [decoded.userId],
+            (err, existingBookings) => {
                 if (err) {
-                    console.error('Error checking trainer:', err);
-                    return res.status(500).json({ message: 'Error checking trainer' });
+                    console.error('Error checking existing bookings:', err);
+                    return res.status(500).json({ message: 'Error checking existing bookings' });
                 }
 
-                if (results.length === 0) {
-                    return res.status(404).json({ message: 'Trainer not found' });
+                if (existingBookings.length > 0) {
+                    return res.status(400).json({
+                        message: `You already have an active booking with trainer ID: ${existingBookings[0].trainer_id}. Cancel it before booking another trainer.`
+                    });
                 }
 
-                if (results[0].role !== 'trainer') {
-                    return res.status(400).json({ message: 'Selected user is not a trainer' });
-                }
-
-                // Insert or update trainee profile first
-                const upsertProfileQuery = `
-                    INSERT INTO trainee_profiles (
-                        user_id,
-                        health_history,
-                        medication_history,
-                        fitness_goal,
-                        preferred_schedule,
-                        experience_level
-                    ) VALUES (?, ?, ?, ?, ?, ?)
-                    ON DUPLICATE KEY UPDATE
-                        health_history = VALUES(health_history),
-                        medication_history = VALUES(medication_history),
-                        fitness_goal = VALUES(fitness_goal),
-                        preferred_schedule = VALUES(preferred_schedule),
-                        experience_level = VALUES(experience_level)
-                `;
-
+                // Check if trainer exists and is actually a trainer
                 connection.query(
-                    upsertProfileQuery,
-                    [
-                        decoded.userId,
-                        healthHistory,
-                        medicationHistory || '',
-                        fitnessGoal,
-                        preferredSchedule,
-                        experienceLevel
-                    ],
-                    (profileErr) => {
-                        if (profileErr) {
-                            console.error('Error upserting trainee profile:', profileErr);
-                            // Continue with booking even if profile update fails
+                    'SELECT id, role FROM users WHERE id = ?',
+                    [trainerId],
+                    (err, results) => {
+                        if (err) {
+                            console.error('Error checking trainer:', err);
+                            return res.status(500).json({ message: 'Error checking trainer' });
                         }
 
-                        // Check for existing pending or accepted booking
-                        connection.query(
-                            'SELECT id, status FROM bookings WHERE user_id = ? AND trainer_id = ? AND (status = "pending" OR status = "accepted")',
-                            [decoded.userId, trainerId],
-                            (err, bookings) => {
-                                if (err) {
-                                    console.error('Error checking existing bookings:', err);
-                                    return res.status(500).json({ message: 'Error checking existing bookings' });
-                                }
+                        if (results.length === 0) {
+                            return res.status(404).json({ message: 'Trainer not found' });
+                        }
 
-                                if (bookings.length > 0) {
-                                    return res.status(400).json({
-                                        message: `You already have a ${bookings[0].status} booking with this trainer`
-                                    });
+                        if (results[0].role !== 'trainer') {
+                            return res.status(400).json({ message: 'Selected user is not a trainer' });
+                        }
+
+                        // Insert or update trainee profile
+                        const upsertProfileQuery = `
+                            INSERT INTO trainee_profiles (
+                                user_id,
+                                health_history,
+                                medication_history,
+                                fitness_goal,
+                                preferred_schedule,
+                                experience_level
+                            ) VALUES (?, ?, ?, ?, ?, ?)
+                            ON DUPLICATE KEY UPDATE
+                                health_history = VALUES(health_history),
+                                medication_history = VALUES(medication_history),
+                                fitness_goal = VALUES(fitness_goal),
+                                preferred_schedule = VALUES(preferred_schedule),
+                                experience_level = VALUES(experience_level)
+                        `;
+
+                        connection.query(
+                            upsertProfileQuery,
+                            [
+                                decoded.userId,
+                                healthHistory,
+                                medicationHistory || '',
+                                fitnessGoal,
+                                preferredSchedule,
+                                experienceLevel
+                            ],
+                            (profileErr) => {
+                                if (profileErr) {
+                                    console.error('Error upserting trainee profile:', profileErr);
+                                    // Continue with booking even if profile update fails
                                 }
 
                                 // Create new booking with all fields
@@ -540,6 +540,7 @@ app.post('/api/bookings', (req, res) => {
         return res.status(401).json({ message: 'Invalid token' });
     }
 });
+
 
 app.get('/api/bookings', (req, res) => {
     const token = req.headers.authorization?.split(' ')[1];
@@ -850,6 +851,55 @@ app.delete('/api/workout-routines/:id', (req, res) => {
     }
   });
 
+  app.get('/api/diet_entries/:userId', (req, res) => {
+    const traineeId = req.params.userId;
+    const token = req.headers.authorization?.split(' ')[1];
+  
+    if (!token) {
+      return res.status(401).json({ message: 'Unauthorized: Token is missing' });
+    }
+  
+    try {
+      const decoded = jwt.verify(token, 'your_jwt_secret');
+      const trainerId = decoded.userId;
+  
+      const bookingQuery = `
+        SELECT * FROM bookings 
+        WHERE user_id = ? AND trainer_id = ? AND status = 'accepted'
+      `;
+  
+      connection.query(bookingQuery, [traineeId, trainerId], (bookingErr, bookingResults) => {
+        if (bookingErr) {
+          console.error('Error verifying booking:', bookingErr);
+          return res.status(500).json({ message: 'Error verifying booking' });
+        }
+  
+        if (bookingResults.length === 0) {
+          return res.status(403).json({ message: 'Forbidden: No accepted booking with this trainee' });
+        }
+  
+        const dietEntriesQuery = `
+          SELECT id, user_id, meal, food_name, calories, created_at 
+          FROM diet_entries 
+          WHERE user_id = ?
+          ORDER BY created_at DESC
+        `;
+  
+        connection.query(dietEntriesQuery, [traineeId], (dietErr, dietResults) => {
+          if (dietErr) {
+            console.error('Error fetching diet entries:', dietErr);
+            return res.status(500).json({ message: 'Error fetching diet entries' });
+          }
+  
+          res.json(dietResults);
+        });
+      });
+    } catch (err) {
+      console.error('Token error:', err);
+      return res.status(401).json({ message: 'Invalid token', error: err.message });
+    }
+  });
+  
   app.get('/api/goals', (req, res) => {
     const traineeId = req.query.user_id;
     const token = req.headers.authorization?.split(' ')[1];
@@ -1270,19 +1320,34 @@ app.get('/api/trainers', (req, res) => {
       }
   
       // Fetch additional trainer details: qualifications, experience, and availability
+      // Also check if the trainer is already booked 
       connection.query(
         `
         SELECT 
-          id, 
-          name, 
-          email, 
-          qualifications, 
-          experience, 
-          availability, 
-          created_at 
-        FROM users 
-        WHERE role = 'trainer'
+          t.id, 
+          t.name, 
+          t.email, 
+          t.qualifications, 
+          t.experience, 
+          t.specialization,
+          t.availability,
+          CASE 
+            WHEN b.id IS NOT NULL AND b.status IN ('pending', 'approved') THEN true 
+            ELSE false 
+          END as is_booked,
+          CASE 
+            WHEN user_booked.id IS NOT NULL THEN true 
+            ELSE false 
+          END as is_booked_by_current_user
+        FROM users t
+        LEFT JOIN bookings b ON b.trainer_id = t.id
+        LEFT JOIN bookings user_booked ON 
+          user_booked.trainer_id = t.id AND 
+          user_booked.user_id = ? AND 
+          user_booked.status IN ('pending', 'approved')
+        WHERE t.role = 'trainer'
         `,
+        [decoded.id], // Pass the current user's ID to check their bookings
         (err, results) => {
           if (err) {
             console.error('Error fetching trainers:', err);
@@ -1297,7 +1362,8 @@ app.get('/api/trainers', (req, res) => {
       return res.status(401).json({ message: 'Invalid token' });
     }
   });
-  
+
+
 app.get('/api/trainee', (req, res) => {
   const token = req.headers.authorization?.split(' ')[1];
   if (!token) {

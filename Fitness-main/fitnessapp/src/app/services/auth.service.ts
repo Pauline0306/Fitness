@@ -87,6 +87,8 @@ register(formData: any) {
   return this.http.post(`${this.apiUrl}/auth/${endpoint}`, formData);
 }
 
+
+
 login(email: string, password: string): Observable<any> {
   return this.http.post<any>(`${this.apiUrl}/auth/login`, { email, password })
     .pipe(
@@ -124,7 +126,7 @@ login(email: string, password: string): Observable<any> {
   
 
   // Helper method to get the Authorization header
-  private getAuthHeaders(): HttpHeaders {
+  public getAuthHeaders(): HttpHeaders {
     const token = this.getToken();
     if (!token) {
       throw new Error('Authentication token is missing.');
@@ -321,16 +323,10 @@ deleteDietEntry(traineeId: number, dietId: number): Observable<void> {
     );
   }
 
-
-getDietEntries(traineeId: number): Observable<DietEntry[]> {
-  return this.http.get<DietEntry[]>(
-    `${this.apiUrl}/diet_entries/${traineeId}`,
-    { headers: this.getAuthHeaders() }
-  ).pipe(
-    catchError(this.handleError)
-  );
-}
-
+  getDietEntries(userId: number): Observable<any> {
+    const headers = this.getAuthHeaders();
+    return this.http.get(`${this.apiUrl}/diet_entries/${userId}`, { headers });
+  }
 
 
 
@@ -399,6 +395,7 @@ getTraineeGoals(userId: number) {
     }
   });
 }
+
 
 }
 

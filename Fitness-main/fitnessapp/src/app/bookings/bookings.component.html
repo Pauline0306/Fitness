@@ -4,13 +4,15 @@
   <div class="dashboard">
     <!-- Available Trainers Section -->
     <section class="trainers-section">
-      <h2>Available Trainers</h2>
+      <h2>Trainers</h2>
       <div class="trainers-grid">
         <div *ngFor="let trainer of trainers" class="trainer-card" (click)="viewTrainerDetails(trainer)">
           <h3>{{ trainer.name }}</h3>
           <button mat-raised-button color="primary" class="view-details-btn">View Details</button>
         </div>
       </div>
+
+      
     </section>
 
     <!-- Trainer Details and Booking Modal -->
@@ -37,6 +39,11 @@
           <p>{{ selectedTrainer.availability }}</p>
         </section>
 
+        <section class="specialization">
+          <h3>Specialization</h3>
+          <p>{{ selectedTrainer.specialization }}</p>
+        </section>
+
         <form class="booking-form">
           <h3>Book Training Period</h3>
           
@@ -44,7 +51,7 @@
           <mat-form-field class="full-width">
             <mat-label>Health History</mat-label>
             <textarea matInput
-                      [(ngModel)]="newBooking.healthHistory"
+                      [(ngModel)]="newBooking.health_history"
                       name="healthHistory"
                       required
                       placeholder="Please describe your health history"
@@ -55,7 +62,7 @@
           <mat-form-field class="full-width">
             <mat-label>Medication History</mat-label>
             <textarea matInput
-                      [(ngModel)]="newBooking.medicationHistory"
+                      [(ngModel)]="newBooking.medication_history"
                       name="medicationHistory"
                       placeholder="Please list any current medications (optional)"
                       rows="3"></textarea>
@@ -65,7 +72,7 @@
           <mat-form-field class="full-width">
             <mat-label>Fitness Goal</mat-label>
             <textarea matInput
-                      [(ngModel)]="newBooking.fitnessGoal"
+                      [(ngModel)]="newBooking.fitness_goal"
                       name="fitnessGoal"
                       required
                       placeholder="What are your fitness goals?"
@@ -76,7 +83,7 @@
           <mat-form-field class="full-width">
             <mat-label>Preferred Schedule</mat-label>
             <input matInput
-                   [(ngModel)]="newBooking.preferredSchedule"
+                   [(ngModel)]="newBooking.preferred_schedule"
                    name="preferredSchedule"
                    required
                    placeholder="e.g., Mornings, Evenings, Weekends">
@@ -85,7 +92,7 @@
           <!-- Experience Level -->
           <mat-form-field class="full-width">
             <mat-label>Experience Level</mat-label>
-            <mat-select [(ngModel)]="newBooking.experienceLevel" name="experienceLevel" required>
+            <mat-select [(ngModel)]="newBooking.experience_level" name="experienceLevel" required>
               <mat-option *ngFor="let level of experienceLevels" [value]="level">
                 {{level | titlecase}}
               </mat-option>
@@ -96,14 +103,14 @@
             <!-- Start Date -->
            <mat-form-field appearance="fill">
   <mat-label>Start Date</mat-label>
-  <input matInput [matDatepicker]="picker1" [(ngModel)]="newBooking.startDate" name="startDate">
+  <input matInput [matDatepicker]="picker1" [(ngModel)]="newBooking.start_date" name="startDate">
   <mat-datepicker-toggle matIconSuffix [for]="picker1"></mat-datepicker-toggle>
   <mat-datepicker #picker1></mat-datepicker>
 </mat-form-field>
 
 <mat-form-field appearance="fill">
   <mat-label>End Date</mat-label>
-  <input matInput [matDatepicker]="picker2" [(ngModel)]="newBooking.endDate" name="endDate">
+  <input matInput [matDatepicker]="picker2" [(ngModel)]="newBooking.end_date" name="endDate">
   <mat-datepicker-toggle matIconSuffix [for]="picker2"></mat-datepicker-toggle>
   <mat-datepicker #picker2></mat-datepicker>
 </mat-form-field>
@@ -131,15 +138,16 @@
     <section class="my-bookings-section">
       <h2>My Bookings</h2>
       <div class="bookings-grid">
-        <div *ngFor="let booking of bookings" class="booking-card">
-          <h3>{{ booking.trainerId }}</h3>
+        <div *ngFor="let booking of bookings$ | async" class="booking-card">
+          <h3>Trainer: {{ booking.trainer_name }}</h3>
           <p>Status: {{ booking.status | titlecase }}</p>
-          <p>Start Date: {{ booking.startDate | date }}</p>
-          <p>End Date: {{ booking.endDate | date }}</p>
-          <p>Fitness Goal: {{ booking.fitnessGoal }}</p>
+          <p>Start Date: {{ booking.start_date | date }}</p>
+          <p>End Date: {{ booking.end_date | date }}</p>
         </div>
       </div>
     </section>
+    
+    
     
 
     

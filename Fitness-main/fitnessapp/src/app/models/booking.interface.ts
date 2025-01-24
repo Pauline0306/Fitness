@@ -6,6 +6,8 @@ export interface TrainerProfile {
   qualifications: string | string[];
   experience: string;
   availability: string;
+  specialization: string;
+  is_booked: boolean; 
 }
 
 
@@ -14,14 +16,14 @@ export interface BookingRequest {
   id?: number; // Optional ID for tracking
   trainerId: number;
   userId: number; // Add the userId field
-  trainerName?: string; // Add this to display trainer names in "My Bookings"
-  healthHistory: string;
-  medicationHistory: string;
-  fitnessGoal: string;
-  preferredSchedule: string;
-  experienceLevel: string;
-  startDate?: string | null;
-  endDate?: string | null;
+  trainer_name?: string; // Add this to display trainer names in "My Bookings"
+  health_history: string;
+  medication_history: string;
+  fitness_goal: string;
+  preferred_schedule: string;
+  experience_level: string;
+  start_date?: string | null;
+  end_date?: string | null;
   status: 'pending' | 'accepted' | 'rejected' | 'completed'; // Add status for booking status
 }
 

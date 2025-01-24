@@ -26,20 +26,22 @@ export class BookingService {
 
 
   
-  getAvailableTrainers(): Observable<TrainerProfile[]> {
-    return this.http.get<TrainerProfile[]>(`${this.baseUrl}/trainers`, { headers: this.getHeaders() }).pipe(
-      catchError(this.handleError),
-      switchMap((trainers: TrainerProfile[]) => {
-        // Fetch active bookings
-        return this.getBookings().pipe(
-          map((bookings: { trainerId: any; }[]) => {
-            const bookedTrainerIds = bookings.map((booking: { trainerId: any; }) => booking.trainerId);
-            // Filter trainers not in the booked list
-            return trainers.filter(trainer => !bookedTrainerIds.includes(trainer.id));
-          })
-        );
+  getAvailableTrainers(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/trainers`, {
+      headers: this.authService.getAuthHeaders() // Use the getAuthHeaders() method from AuthService
+    }).pipe(
+      catchError(error => {
+        console.error('Error fetching available trainers:', error);
+        throw error;
       })
     );
+  }
+
+  private formatQualifications(qualifications: string | string[]): string[] {
+    if (Array.isArray(qualifications)) {
+      return qualifications;
+    }
+    return qualifications ? qualifications.split(',').map(q => q.trim()) : [];
   }
   
   
@@ -77,13 +79,13 @@ export class BookingService {
     // Make sure all required fields are included in the request
     const bookingData = {
       trainerId: booking.trainerId,
-      healthHistory: booking.healthHistory,
-      medicationHistory: booking.medicationHistory,
-      fitnessGoal: booking.fitnessGoal,
-      preferredSchedule: booking.preferredSchedule,
-      experienceLevel: booking.experienceLevel,
-      startDate: booking.startDate,
-      endDate: booking.endDate
+      healthHistory: booking.health_history,
+      medicationHistory: booking.medication_history,
+      fitnessGoal: booking.fitness_goal,
+      preferredSchedule: booking.preferred_schedule,
+      experienceLevel: booking.experience_level,
+      startDate: booking.start_date,
+      endDate: booking.end_date
     };
 
     return this.http.post(`${this.baseUrl}/bookings`, bookingData, {

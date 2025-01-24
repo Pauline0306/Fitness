@@ -31,11 +31,24 @@
       <h2>Active Trainees</h2>
       <div *ngFor="let trainee of trainees" class="trainee-card">
         <h3>{{ trainee.trainee_name }}</h3>
-
+        <div class="goals-section">
+          <h4>Trainee Goals</h4>
+          <div *ngIf="goalsByTrainee[trainee.user_id] && goalsByTrainee[trainee.user_id].length > 0">
+            <ul>
+              <li *ngFor="let goal of goalsByTrainee[trainee.user_id]">
+                <strong>{{ goal.name }}</strong>
+                <p>Target: {{ goal.target }}</p>
+                <p>Progress: {{ goal.progress_percentage }}%</p>
+              </li>
+            </ul>
+          </div>
+          <div *ngIf="!goalsByTrainee[trainee.user_id] || goalsByTrainee[trainee.user_id].length === 0">
+            <p>No goals found for this trainee</p>
+          </div>
+        </div>
+        
        
           
-          
-
         <!-- Workout Management -->
        <div class="workout-management">
         <h4>Workout Routines</h4>
@@ -133,8 +146,10 @@
 
 
 
-        <!-- Diet Management -->
+        
        <!-- Diet Management -->
+
+       
 <div class="diet-management">
   <h4>Diet Recommendation</h4>
   
