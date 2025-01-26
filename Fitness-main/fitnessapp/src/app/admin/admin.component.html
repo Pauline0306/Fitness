@@ -1,1 +1,30 @@
-<p>admin works!</p>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap">
+<nav class="navbar">
+    <div class="navbar-left">
+      <img src="assets/images/FitConnectLogo.png" alt="Logo" class="navbar-logo">
+      <div class="navbar-brand">Admin Side</div>
+    </div>
+    <button class="logout-btn">
+        <div class="icon"></div>
+        <div class="text">Logout</div>
+    </button>
+  </nav>
+  
+  <div class="admin-container">
+    <h1>Trainer Registration Requests</h1>
+    
+    <div class="requests-container">
+      <div class="request-card" *ngFor="let request of trainerRequests">
+        <h2>{{ request.name }}</h2>
+        <p><strong>Email:</strong> {{ request.email }}</p>
+        <p><strong>Phone:</strong> {{ request.phone }}</p>
+        <p><strong>Specialization:</strong> {{ request.specialization }}</p>
+        <p><strong>Status:</strong> {{ request.status }}</p>
+        
+        <div class="action-buttons">
+          <button (click)="approveRequest(request.id)" class="approve">Approve</button>
+          <button (click)="rejectRequest(request.id)" class="reject">Reject</button>
+        </div>
+      </div>
+    </div>
+  </div>
